@@ -5,159 +5,234 @@
 
 import { Chapter } from "./types";
 
-export const BPM = 105;
-export const BEAT_MS = 60000 / BPM;
+export const GAME_CONSTANTS = {
+  SPEED: 3, // 已经为你调慢了速度，方便玩家看清文字
+  TURN_SPEED_PERFECT: Math.PI / 2,
+  TURN_SPEED_GREAT: Math.PI / 3,
+  TURN_SPEED_OK: Math.PI / 6,
+  REPAIR_INC: 20,
+  MISS_DEC: 10,
+};
 
+export const BEAT_MS = 500;
+
+// 完美还原《模拟人生》文档的网状多结局大纲
 export const CHAPTERS: Chapter[] = [
-  // --- CHILDHOOD ---
+  // ================= 【阶段一：童年】 =================
   {
-    id: "childhood_start",
-    title: "童年的红纸伞",
-    description: "雨天里，父亲在校门口接你，你却因为和同学嬉闹跑远了。",
+    id: 'childhood_start',
+    title: '童年时光',
+    description: '“我开始明白，人生的路，要靠自己一步一步走。”\n放学后，我更愿意...',
     age: 'CHILDHOOD',
+    bgImage: '/picture/2.1小学教室.png', // 【新增】：填入对应的图片路径
     choices: {
-      good: {
-        text: "跑回红纸伞下",
-        memory: "那种干燥和温暖的味道，伴随了你一整个童年。",
-        nextId: "youth_study"
+      good: { // 左边赛道
+        text: '回家认真写作业',
+        memory: '“别人都在玩的时候，我知道，努力可能是我唯一的机会。”',
+        nextId: 'youth_study' // 导向学业路线
       },
-      bad: {
-        text: "在雨中继续奔跑",
-        memory: "感冒发烧的夜晚，你听见父母在门外低声叹息。",
-        nextId: "youth_rebel"
+      bad: {  // 右边赛道
+        text: '和朋友出去玩',
+        memory: '“成绩也许重要，但青春好像更值得珍惜。”',
+        nextId: 'youth_play' // 导向自由/社会路线
       }
     }
   },
-  // --- YOUTH ---
+
+  // ================= 【阶段二：青春】 =================
   {
-    id: "youth_study",
-    title: "安静的图书馆",
-    description: "如果你能静下心来多看两本书，人生的底色是否会更厚重？",
+    id: 'youth_study',
+    title: '青春的十字路口',
+    description: '“第一次，我认真思考未来。想成为什么样的人？”\n高考临近，我决定...',
     age: 'YOUTH',
+    bgImage: '/picture/3.1操场夕阳教学楼.png', // 【新增】：进入这条线后，背景自动切换
     choices: {
       good: {
-        text: "沉浸在书海中",
-        memory: "那些智慧后来成了你最坚实的盔甲。",
-        nextId: "career_stable"
+        text: '全力冲刺重点大学',
+        memory: '无数个熬夜苦读的夜晚，换来了一纸名校录取通知书。',
+        nextId: 'adult_degree' 
       },
       bad: {
-        text: "看向窗外发呆",
-        memory: "你记住了变幻的云，却忘记了握住翻身的机会。",
-        nextId: "career_risk"
+        text: '选择普通大学稳步前进',
+        memory: '没有极度的内卷，获得了相对平和的校园时光。',
+        nextId: 'adult_normal'
       }
     }
   },
   {
-    id: "youth_rebel",
-    title: "叛逆的琴弦",
-    description: "想做一名摇滚乐手，却被视作某种“不务正业”的叛逆。",
+    id: 'youth_play',
+    title: '青春的躁动',
+    description: '“第一次，我认真思考未来。想成为什么样的人？”\n看着同龄人埋头苦读，我决定...',
     age: 'YOUTH',
+    bgImage: '/picture/3.2操场夕阳教学楼.png', // 【新增】：进入这条线后，背景自动切换
     choices: {
       good: {
-        text: "勇敢带走那把吉他",
-        memory: "哪怕生活颠沛流离，你的血液里流淌着自由。",
-        nextId: "career_risk"
+        text: '提前进入社会打拼',
+        memory: '提早步入社会，感受到了人情冷暖与赚钱的不易。',
+        nextId: 'adult_work'
       },
       bad: {
-        text: "锁上琴箱回书房",
-        memory: "你成了他们期待的乖孩子，却弄丢了发光的自己。",
-        nextId: "career_stable"
+        text: '和朋友尝试小成本创业',
+        memory: '拿着微薄的本金，开启了充满未知与风险的创业路。',
+        nextId: 'adult_biz'
       }
     }
   },
-  // --- ADULT ---
+
+  // ================= 【阶段三：成年】 =================
   {
-    id: "career_stable",
-    title: "格子间的围城",
-    description: "在一份稳定的工作中老去，还是在风浪中博一个可能？",
+    id: 'adult_degree',
+    title: '学业路线：职场起步',
+    description: '“长大以后才发现，最难的不是选择，而是承担结果。”\n名校毕业后...',
     age: 'ADULT',
+    bgImage: '/picture/4.1.1重点大学.png', // 【新增】：进入这条线后，背景自动切换
     choices: {
       good: {
-        text: "坚持热爱的副业",
-        memory: "夜晚的台灯下，你重新找回了生命的意义。",
-        nextId: "family_balance"
+        text: '进入大厂，追求高薪',
+        memory: '深夜的办公室和加班灯光，成为了生活的常态。',
+        nextId: 'elder_rich' // 结局：高收入人生
       },
       bad: {
-        text: "彻底放弃幻想",
-        memory: "稳定的薪水换来了日复一日的空洞。",
-        nextId: "family_duty"
+        text: '考研深造，追求学术',
+        memory: '选择了学术的孤寂，在实验室里度过无数日夜。',
+        nextId: 'elder_academic' // 结局：学者人生
       }
     }
   },
   {
-    id: "career_risk",
-    title: "创业的寒冬",
-    description: "资金链断裂的那个夜晚，你是否想过回家？",
+    id: 'adult_normal',
+    title: '平凡路线：步入社会',
+    description: '没有名校光环，面临着第一份工作的抉择。我更看重...',
     age: 'ADULT',
+    bgImage: '/picture/3.5创业.png', // 【新增】：进入这条线后，背景自动切换
     choices: {
       good: {
-        text: "卖掉最后一辆车坚持",
-        memory: "黎明前的黑暗很长，但你挺到了破晓。",
-        nextId: "elder_legend"
+        text: '追求稳定，考公考编',
+        memory: '选择了朝九晚五的规律生活，平淡却安心。',
+        nextId: 'elder_stable' // 结局：稳定人生
       },
       bad: {
-        text: "承认失败并回归现实",
-        memory: "你回归了平凡，心底却有一个永远没填上的洞。",
-        nextId: "family_duty"
-      }
-    }
-  },
-  // --- ELDER ---
-  {
-    id: "family_balance",
-    title: "迟到的勋章",
-    description: "当你老了，是庆幸当年的坚持，还是遗憾错过的天伦？",
-    age: 'ELDER',
-    choices: {
-      good: {
-        text: "把故事讲给孙子听",
-        memory: "你的遗憾最终化作了照亮后辈的灯火。",
-      },
-      bad: {
-        text: "独自翻看陈旧相册",
-        memory: "那些热烈的梦，在沉默中慢慢蒙尘。"
+        text: '追求自由，做自由职业',
+        memory: '在咖啡馆办公，虽然未来不确定，但内心丰盈。',
+        nextId: 'elder_free' // 结局：自由人生
       }
     }
   },
   {
-    id: "family_duty",
-    title: "老屋的叮咛",
-    description: "如果重新来过，你还会选择远走吗？",
-    age: 'ELDER',
+    id: 'adult_work',
+    title: '冒险路线：社会大学',
+    description: '过早离开校园，你在外地打拼，经历了漫长的低谷...',
+    age: 'ADULT',
+    bgImage: '/picture/3.4提前工作.png', // 【新增】：进入这条线后，背景自动切换
     choices: {
       good: {
-        text: "留在家乡陪伴老友",
-        memory: "落叶归根，这份踏实是你余生最大的财富。",
+        text: '咬牙坚持，绝不认输',
+        memory: '挺过了最难熬的日子，遇到贵人，迎来了人生反转。',
+        nextId: 'elder_adventure' // 结局：逆袭人生
       },
       bad: {
-        text: "依然向往远方",
-        memory: "旅人终老，你始终在那条没有终点的路上。"
+        text: '妥协退让，回老家发展',
+        memory: '放下了在外漂泊的执念，选择了陪伴与家庭的温暖。',
+        nextId: 'elder_family' // 结局：顾家人生
       }
     }
   },
   {
-    id: "elder_legend",
-    title: "孤独的守望者",
-    description: "你赢得了世界，却发现身边早已空无一人。",
-    age: 'ELDER',
+    id: 'adult_biz',
+    title: '创业路线：创业维艰',
+    description: '第一次创业失败，面临巨额负债的低谷，我选择...',
+    age: 'ADULT',
+    bgImage: '/picture/3.3创业失败.png', // 【新增】：进入这条线后，背景自动切换
     choices: {
       good: {
-        text: "写下《人生无悔》",
-        memory: "你成就了传奇，也将孤独酿成了美酒。",
+        text: '顶着负债再次尝试',
+        memory: '在绝望中寻找生机，最终抓住了风口，成功逆袭。',
+        nextId: 'elder_boss' // 结局：企业家人生
       },
       bad: {
-        text: "回首寻找那个影子",
-        memory: "在巅峰之上，你最想要的却是一个简单的拥抱。"
+        text: '找份普通工作还债',
+        memory: '认清了现实，学会了向生活低头，踏实过好每一天。',
+        nextId: 'elder_family' // 结局：顾家人生
       }
+    }
+  },
+
+  // ================= 【阶段四：老年/结局 (没有 nextId 触发结算)】 =================
+  {
+    id: 'elder_rich',
+    title: '结局：高收入人生',
+    description: '岁月如梭。回首这一生，你通过不懈的努力，获得了世俗意义上的巨大成功。',
+    age: 'ELDER',
+    bgImage: '/picture/4.2.2成功逆袭.png', // 【新增】：进入这条线后，背景自动切换
+    choices: {
+      good: { text: '回望财富与地位', memory: '账户里的数字，是你一生奋斗的最佳证明。' },
+      bad: { text: '回望错过的风景', memory: '得到了全世界，却也失去了很多纯粹的快乐。' }
+    }
+  },
+  {
+    id: 'elder_academic',
+    title: '结局：学者人生',
+    description: '岁月如梭。你一生致力于探索真理，精神世界无比富足。',
+    age: 'ELDER',
+    bgImage: '/picture/4.2.2成功逆袭.png', // 【新增】：进入这条线后，背景自动切换
+    choices: {
+      good: { text: '回望学术成就', memory: '你的名字，留在了这片领域的历史中。' },
+      bad: { text: '回望纯粹的内心', memory: '一辈子只做了一件事，且做到了极致。' }
+    }
+  },
+  {
+    id: 'elder_stable',
+    title: '结局：稳定人生',
+    description: '岁月如梭。没有大起大落，你拥有了一个安稳、平静且幸福的普通人的一生。',
+    age: 'ELDER',
+    bgImage: '/picture/4.2.2成功逆袭.png', // 【新增】：进入这条线后，背景自动切换
+    choices: {
+      good: { text: '回望平淡岁月', memory: '平安健康，本身就是一种巨大的成功。' },
+      bad: { text: '回望安稳幸福', memory: '陪伴家人吃好每一顿饭，是最大的确幸。' }
+    }
+  },
+  {
+    id: 'elder_free',
+    title: '结局：自由人生',
+    description: '岁月如梭。你没有被世俗定义，始终跟随着自己的内心，体验了多彩的世界。',
+    age: 'ELDER',
+    bgImage: '/picture/4.2.2成功逆袭.png', // 【新增】：进入这条线后，背景自动切换
+    choices: {
+      good: { text: '回望沿途风景', memory: '世界是一本书，而你读完了很多精彩的章节。' },
+      bad: { text: '回望自由灵魂', memory: '没有遗憾，因为每一天都是为自己而活。' }
+    }
+  },
+  {
+    id: 'elder_adventure',
+    title: '结局：逆袭人生',
+    description: '岁月如梭。从低谷到山巅，你的人生充满戏剧性，见证了无数奇迹。',
+    age: 'ELDER',
+    bgImage: '/picture/4.2.2成功逆袭.png', // 【新增】：进入这条线后，背景自动切换
+    choices: {
+      good: { text: '回望低谷挣扎', memory: '那些杀不死你的，最终让你变得更强大。' },
+      bad: { text: '回望顶峰风光', memory: '你吃过的苦，最终都变成了光。' }
+    }
+  },
+  {
+    id: 'elder_family',
+    title: '结局：顾家人生',
+    description: '岁月如梭。虽然未能大富大贵，但身边始终有爱人的陪伴和家人的笑脸。',
+    age: 'ELDER',
+    bgImage: '/picture/4.2.2成功逆袭.png', // 【新增】：进入这条线后，背景自动切换
+    choices: {
+      good: { text: '回望家庭温馨', memory: '为家人遮风挡雨，是你这辈子最大的骄傲。' },
+      bad: { text: '回望平凡感动', memory: '爱与被爱，构成了你生命中最暖的底色。' }
+    }
+  },
+  {
+    id: 'elder_boss',
+    title: '结局：企业家人生',
+    description: '岁月如梭。经历了无数次绝望与重生，你终于建立了自己的商业帝国。',
+    age: 'ELDER',
+    bgImage: '/picture/4.2.2成功逆袭.png', // 【新增】：进入这条线后，背景自动切换
+    choices: {
+      good: { text: '回望创业艰辛', memory: '几度浮沉，你最终证明了自己的商业眼光。' },
+      bad: { text: '回望商业帝国', memory: '你改变了自己的人生，也改变了许多人的生活。' }
     }
   }
 ];
-
-export const GAME_CONSTANTS = {
-  SPEED: 3.3,
-  TURN_SPEED_PERFECT: Math.PI / 2, // 90 degrees
-  TURN_SPEED_GREAT: Math.PI / 3, // 60 degrees
-  TURN_SPEED_OK: Math.PI / 5, // 36 degrees
-  REPAIR_INC: 25,
-  MISS_DEC: 10,
-};

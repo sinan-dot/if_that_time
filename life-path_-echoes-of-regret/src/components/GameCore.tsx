@@ -323,7 +323,25 @@ export const GameCore: React.FC = () => {
           }
         }}
       >
-        <canvas ref={canvasRef} className="absolute inset-0" />
+        <canvas ref={canvasRef} className="absolute inset-0  z-10" />
+
+
+    {/* ============ 新增的背景图代码开始 ============ */}
+    <AnimatePresence>
+          {currentChapter && currentChapter.bgImage ? (
+            <motion.img
+              key={currentChapter.id}
+              src={currentChapter.bgImage}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.35 }} 
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.5 }} 
+              className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
+            />
+          ) : null}
+        </AnimatePresence>
+        {/* ============ 新增的背景图代码结束 ============ */}
+
 
         <AnimatePresence>
           {gameState === 'START' && <StartScreen onStart={onStart} />}
