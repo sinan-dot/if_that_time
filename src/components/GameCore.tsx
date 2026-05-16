@@ -24,6 +24,8 @@ export const GameCore: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const requestRef = useRef<number>(undefined);
   const lastBeatRef = useRef<number>(0);
+  // 【新增这一行】：创建一个音频播放器的引用
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   // 物理引擎状态
   const stateRef = useRef({
@@ -290,7 +292,13 @@ export const GameCore: React.FC = () => {
   const onStart = () => {
     initGame();
     setGameState('PLAYING');
-  };
+
+  // 【新增这几行】：当玩家点击开始按钮时，播放音乐
+  if (audioRef.current) {
+    audioRef.current.volume = 0.5; // 设置音量为 50%，防止音乐太大盖过后面的音效或显得刺耳
+    audioRef.current.play().catch(e => console.log("音乐播放失败:", e));
+  }
+};
 
   // 【手机端滑动操控核心】：支持鼠标拖拽和手指滑动
   const handlePointer = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
@@ -323,6 +331,10 @@ export const GameCore: React.FC = () => {
           }
         }}
       >
+
+        {/* 【新增这一行】：隐形的音频播放器，指向 public 里的 bgm.mp3，loop 表示无限循环 */}
+        <audio ref={audioRef} src="/bgm.mp3" loop preload="auto" />
+        
         <canvas ref={canvasRef} className="absolute inset-0  z-10" />
 
 
