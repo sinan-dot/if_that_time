@@ -154,7 +154,7 @@ export const CHAPTERS: Chapter[] = [
 ];
 
 export const GAME_CONSTANTS = {
-  SPEED: 4,
+  SPEED: 3.3,
   TURN_SPEED_PERFECT: Math.PI / 2, // 90 degrees
   TURN_SPEED_GREAT: Math.PI / 3, // 60 degrees
   TURN_SPEED_OK: Math.PI / 5, // 36 degrees
