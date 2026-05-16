@@ -16,7 +16,7 @@ export const GameCore: React.FC = () => {
   const [repair, setRepair] = useState(0);
   const [combo, setCombo] = useState(0);
   const [miss, setMiss] = useState(0);
-  const [currentChapterId, setCurrentChapterId] = useState("childhood_start");
+  const [currentChapterId, setCurrentChapterId] = useState("event_001");
   const [showChapterText, setShowChapterText] = useState(false);
   
   // 新增：用于获取手机屏幕外壳的尺寸
@@ -47,59 +47,105 @@ export const GameCore: React.FC = () => {
 
     const baseY = currentY - 800;
     const width = containerRef.current.clientWidth;
-    const margin = width * 0.2; // 选项距离屏幕边缘的距离
-    
-    // 随机左右生成，避免玩家一直待在一边
-    const isGoodLeft = Math.random() > 0.5;
-    const goodX = isGoodLeft ? margin : width - margin;
-    const badX = isGoodLeft ? width - margin : margin;
+    const newNodes: NodeData[] = [];
 
-    const newNodes: NodeData[] = [
-      {
+    if (chapter.isSingle) {
+      // 单线催泪点：只在屏幕正中间生成一个球
+      newNodes.push({
         id: `good-${chapterId}-${Date.now()}`,
         type: 'good',
         text: chapter.choices.good.text,
-        x: goodX,
+        x: width / 2, 
         y: baseY,
-        hit: false
-      },
-      {
-        id: `bad-${chapterId}-${Date.now()}`,
-        type: 'bad',
-        text: chapter.choices.bad.text,
-        x: badX,
-        y: baseY - 400, // 错开出现
-        hit: false
+        hit: false,
+        passed: false 
+      });
+    } else {
+      // 正常的二选一：分别放在左右两边
+      const margin = width * 0.25;
+      const isGoodLeft = Math.random() > 0.5;
+      
+      newNodes.push({
+        id: `good-${chapterId}-${Date.now()}`,
+        type: 'good',
+        text: chapter.choices.good.text,
+        x: isGoodLeft ? margin : width - margin,
+        y: baseY,
+        hit: false,
+        passed: false
+      });
+      
+      // 【重点防报错】：这里必须加 if 判断！如果有 bad 选项才生成第二个球！
+      if (chapter.choices.bad) {
+        newNodes.push({
+          id: `bad-${chapterId}-${Date.now()}`,
+          type: 'bad',
+          text: chapter.choices.bad.text,
+          x: isGoodLeft ? width - margin : margin,
+          y: baseY,
+          hit: false,
+          passed: false
+        });
       }
-    ];
+    }
 
     stateRef.current.nodes = [...stateRef.current.nodes, ...newNodes];
-    stateRef.current.lastSpawnY = baseY - 400;
+    stateRef.current.lastSpawnY = baseY - 800;
   }, []);
+
+  // const initGame = useCallback(() => {
+  //   if (!containerRef.current) return;
+  //   const startX = containerRef.current.clientWidth / 2;
+    
+  //   stateRef.current.x = startX;
+  //   stateRef.current.targetX = startX; 
+  //   stateRef.current.y = containerRef.current.clientHeight * 0.8;
+  //   stateRef.current.angle = -Math.PI / 2;
+  //   stateRef.current.trail = [];
+  //   stateRef.current.speed = GAME_CONSTANTS.SPEED;
+  //   stateRef.current.nodes = [];
+  //   stateRef.current.lastSpawnY = 0;
+
+  //   setCurrentChapterId("event_001");
+  //   spawnNextNodes("childhood_start", stateRef.current.y);
+
+  //   setRepair(0);
+  //   setCombo(0);
+  //   setMiss(0);
+  //   setShowChapterText(true);
+  //   setTimeout(() => setShowChapterText(false), 3000);
+  //   lastBeatRef.current = performance.now();
+  // }, [spawnNextNodes]);
 
   const initGame = useCallback(() => {
     if (!containerRef.current) return;
     const startX = containerRef.current.clientWidth / 2;
-    
+    const startY = containerRef.current.clientHeight * 0.8;
+
+    // 1. 重置所有的物理引擎状态
     stateRef.current.x = startX;
-    stateRef.current.targetX = startX; 
-    stateRef.current.y = containerRef.current.clientHeight * 0.8;
+    stateRef.current.targetX = startX;
+    stateRef.current.y = startY;
     stateRef.current.angle = -Math.PI / 2;
     stateRef.current.trail = [];
     stateRef.current.speed = GAME_CONSTANTS.SPEED;
-    stateRef.current.nodes = [];
-    stateRef.current.lastSpawnY = 0;
+    stateRef.current.nodes = []; // 清空上一局残留的光球
+    stateRef.current.lastSpawnY = startY;
 
-    setCurrentChapterId("childhood_start");
-    spawnNextNodes("childhood_start", stateRef.current.y);
-
+    // 2. 重置所有的UI分数和状态
     setRepair(0);
     setCombo(0);
     setMiss(0);
+    setPops([]);
+    setCurrentChapterId("event_001"); // 切回第一关
     setShowChapterText(true);
-    setTimeout(() => setShowChapterText(false), 3000);
-    lastBeatRef.current = performance.now();
+
+    // 【最关键的一步】：强制呼叫刷球函数，把第一关的选项刷出来！
+    spawnNextNodes("event_001", startY);
+
   }, [spawnNextNodes]);
+
+
 
   const showPop = (text: string, x: number, worldY: number) => {
     const id = Date.now() + Math.random();
@@ -203,11 +249,10 @@ export const GameCore: React.FC = () => {
 
     const { x, y, speed, targetX, nodes, trail } = stateRef.current;
     
-    // 【物理追踪核心】：X轴丝滑追随手指，Y轴匀速向前
+    // 物理追踪
     const newX = x + (targetX - x) * 0.35; 
     const newY = y - speed;
 
-    // 动态计算车头偏转角度（Math.atan2 根据X和Y的变化量自动计算出夹角）
     const dx = newX - x;
     const dy = newY - y;
     stateRef.current.angle = Math.atan2(dy, dx);
@@ -216,43 +261,53 @@ export const GameCore: React.FC = () => {
     if (trail.length > 150) trail.shift();
     trail.forEach(t => t.opacity *= 0.98);
 
-    // 碰撞检测逻辑保持不变
+    // ================= 核心碰撞与线性推进逻辑 =================
+    // ====== 把原本 update 里面的 nodes.forEach 替换成下面这套 ====== 
+    let triggeredNext = false; // 新增一个裁判：这一帧是否触发了下一关？
+
     nodes.forEach(node => {
-      if (node.hit) return;
+      if (node.hit || node.passed) return;
+
       const distX = newX - node.x;
       const distY = newY - node.y;
-      if (Math.sqrt(distX*distX + distY*distY) < 40) {
+
+      // 【情况1：碰撞】
+      if (Math.sqrt(distX*distX + distY*distY) < 35) {
         node.hit = true;
-        const chapter = CHAPTERS.find(c => c.id === currentChapterId);
-        
+        triggeredNext = true; // 裁判吹哨：需要进入下一关！
+        showPop("命运的抉择", node.x, node.y);
+      }
+      
+      // 【情况2：错过防卡死】
+      else if (newY < node.y - 100) {
+        node.passed = true;
+        // 只有 good 节点负责触发错过逻辑，防止同一排的 bad 也触发
         if (node.type === 'good') {
-          setRepair(r => Math.min(100, r + GAME_CONSTANTS.REPAIR_INC));
-          setCombo(c => c + 2);
-          showPop("弥补遗憾", node.x, node.y);
-          if (chapter?.choices.good.nextId) {
-            setCurrentChapterId(chapter.choices.good.nextId);
-            spawnNextNodes(chapter.choices.good.nextId, newY);
-            setShowChapterText(true);
-            setTimeout(() => setShowChapterText(false), 3000);
-          } else {
-            setGameState('ENDING');
-          }
-        } else {
-          setRepair(r => Math.max(0, r - GAME_CONSTANTS.MISS_DEC));
-          setMiss(m => m + 1);
-          setCombo(0);
-          showPop("深陷过往", node.x, node.y);
-          if (chapter?.choices.bad.nextId) {
-            setCurrentChapterId(chapter.choices.bad.nextId);
-            spawnNextNodes(chapter.choices.bad.nextId, newY);
-            setShowChapterText(true);
-            setTimeout(() => setShowChapterText(false), 3000);
-          } else {
-             setGameState('ENDING');
-          }
+          triggeredNext = true; // 裁判吹哨：错过了，也要强推下一关！
+          showPop("随波逐流", newX, newY);
         }
       }
     });
+
+    // 【核心修复】：如果裁判吹哨了，统一在这里处理推关逻辑
+    if (triggeredNext) {
+      // 重点：立刻把屏幕上所有还没撞到的老球，统统标记为“已废弃(passed)”！
+      // 这样它们滑出屏幕时，就不会再引发连环触发了！
+      stateRef.current.nodes.forEach(n => n.passed = true);
+
+      const currentIndex = CHAPTERS.findIndex(c => c.id === currentChapterId);
+      const nextChapter = CHAPTERS[currentIndex + 1];
+      
+      if (nextChapter) {
+        setCurrentChapterId(nextChapter.id);
+        spawnNextNodes(nextChapter.id, newY);
+        setShowChapterText(true);
+        setTimeout(() => setShowChapterText(false), 3000);
+      } else {
+        setGameState('ENDING');
+      }
+    }
+    // =========================================================
 
     stateRef.current.x = newX;
     stateRef.current.y = newY;
@@ -334,7 +389,7 @@ export const GameCore: React.FC = () => {
 
         {/* 【新增这一行】：隐形的音频播放器，指向 public 里的 bgm.mp3，loop 表示无限循环 */}
         <audio ref={audioRef} src="/bgm.mp3" loop preload="auto" />
-        
+
         <canvas ref={canvasRef} className="absolute inset-0  z-10" />
 
 

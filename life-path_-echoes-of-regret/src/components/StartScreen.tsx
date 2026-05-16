@@ -20,8 +20,9 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
         className="max-w-xl space-y-8"
       >
         <h1 className="text-6xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white to-blue-300 font-display">
-          如果那时候
+          如果那时
         </h1>
+      
         
         <div className="space-y-4 text-lg leading-relaxed text-blue-100/80">
           <p>
