@@ -373,6 +373,10 @@ export const GameCore: React.FC = () => {
   // 【新增这几行】：当玩家点击开始按钮时，播放音乐
   if (audioRef.current) {
     audioRef.current.volume = 0.5; // 设置音量为 50%，防止音乐太大盖过后面的音效或显得刺耳
+
+    // 【加上这一行！】：强制浏览器重新加载 src 里的新音频文件
+    audioRef.current.load();
+
     audioRef.current.play().catch(e => console.log("音乐播放失败:", e));
   }
 };
@@ -409,6 +413,7 @@ export const GameCore: React.FC = () => {
         }}
       >
 
+
         {/* 【新增这一行】：隐形的音频播放器，指向 public 里的 bgm.mp3，loop 表示无限循环 */}
         <audio ref={audioRef} src="/bgm.mp3" loop preload="auto" />
 
@@ -440,7 +445,7 @@ export const GameCore: React.FC = () => {
   currentStep={CHAPTERS.findIndex(c => c.id === currentChapterId) + 1} 
   totalSteps={CHAPTERS.length} 
   age={currentChapter?.age || 'CHILDHOOD'} 
-/>      <HUD repair={repair} combo={combo} miss={miss} currentChapterTitle={currentChapter?.title || "末章"} />
+/>    
               {showChapterText && currentChapter && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9, y: 50 }}
@@ -459,16 +464,7 @@ export const GameCore: React.FC = () => {
               <BeatVisualizer interval={BEAT_MS} />
             </>
           )}
-        {gameState === 'ENDING' && (
-  <ResultScreen 
-    stats={stats} 
-    onRestart={() => {
-      initGame();
-      setGameState('START');
-      window.location.reload(); // 强制刷新，最干净利落的重开方式
-    }} 
-  />
-)}
+          {gameState === 'ENDING' && <ResultScreen stats={stats} onRestart={() => window.location.reload()} />}
         </AnimatePresence>
 
         {pops.map(pop => (
