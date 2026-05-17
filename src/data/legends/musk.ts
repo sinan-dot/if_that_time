@@ -77,10 +77,15 @@ export const muskLegend: LegendChapter = {
         ],
       },
       minigame: {
-        type: 'click',
-        title: '融资生死线',
-        instruction: '点击按钮完成投资人谈判',
-        data: { targetCount: 8 },
+        type: 'coin',
+        title: '融资抛硬币',
+        instruction: '抛硬币决定融资命运，目标花色获得资金',
+        data: {
+          targetSide: 'front',
+          frontDesign: '火箭',
+          backDesign: '星标',
+          targetAmount: '$5000万',
+        },
       },
     },
     {

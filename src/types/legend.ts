@@ -58,7 +58,7 @@ export interface LegendConsequence {
 
 /** 小游戏配置 */
 export interface MiniGameConfig {
-  type: 'drag' | 'click' | 'sequence' | 'timing' | 'puzzle' | 'screw';
+  type: 'drag' | 'click' | 'sequence' | 'timing' | 'puzzle' | 'screw' | 'memory' | 'coin';
   title: string;
   instruction: string;
   duration?: number;
@@ -66,7 +66,7 @@ export interface MiniGameConfig {
 }
 
 /** 小游戏数据 */
-export type MiniGameData = DragGameData | ClickGameData | SequenceGameData | TimingGameData | ScrewGameData;
+export type MiniGameData = DragGameData | ClickGameData | SequenceGameData | TimingGameData | ScrewGameData | MemoryGameData | CoinGameData;
 
 export interface DragGameData {
   targets: Array<{
@@ -92,6 +92,22 @@ export interface TimingGameData {
 
 export interface ScrewGameData {
   screwCount: number;
+}
+
+export interface MemoryGameData {
+  /** 4对卡片的内容（关键词） */
+  pairs: string[];
+}
+
+export interface CoinGameData {
+  /** 目标花色（正面或反面） */
+  targetSide: 'front' | 'back';
+  /** 正面图案名称 */
+  frontDesign: string;
+  /** 反面图案名称 */
+  backDesign: string;
+  /** 目标融资金额显示 */
+  targetAmount?: string;
 }
 
 /** 结局配置 */

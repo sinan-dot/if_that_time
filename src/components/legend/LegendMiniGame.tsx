@@ -175,6 +175,17 @@ export const LegendMiniGame: React.FC<LegendMiniGameProps> = ({
               <ScrewGame onComplete={handleSuccess} screwCount={(config.data as any)?.screwCount || 4} colors={clayColors} />
             ) : config.type === 'sequence' ? (
               <SequenceGame onComplete={handleSuccess} sequence={(config.data as any)?.sequence || []} colors={clayColors} />
+            ) : config.type === 'memory' ? (
+              <MemoryGame onComplete={handleSuccess} pairs={(config.data as any)?.pairs || []} colors={clayColors} />
+            ) : config.type === 'coin' ? (
+              <CoinGame
+                onComplete={handleSuccess}
+                targetSide={(config.data as any)?.targetSide || 'front'}
+                frontDesign={(config.data as any)?.frontDesign || '火箭'}
+                backDesign={(config.data as any)?.backDesign || '星标'}
+                targetAmount={(config.data as any)?.targetAmount || '融资成功'}
+                colors={clayColors}
+              />
             ) : (
               <ClickGame onComplete={handleSuccess} targetCount={(config.data as any)?.targetCount || 5} colors={clayColors} />
             )
@@ -669,6 +680,405 @@ const SequenceGame: React.FC<{ onComplete: () => void; sequence: string[]; color
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium" style={{ color: '#8B7D9B' }}>
           {currentStep}/{sequence.length} 步骤完成
+        </p>
+        <motion.button
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
+          onClick={handleReset}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl"
+          style={{
+            background: colors.sunshine,
+            border: '3px solid rgba(255, 200, 100, 0.5)',
+            boxShadow: 'inset -2px -2px 6px rgba(200, 150, 100, 0.2), 4px 4px 10px rgba(255, 200, 100, 0.3)',
+            color: '#8B6B4B',
+          }}
+        >
+          <RefreshCw className="w-4 h-4" />
+          重置
+        </motion.button>
+      </div>
+    </div>
+  );
+};
+
+// 翻牌对对碰小游戏组件 - Claymorphism风格
+const MemoryGame: React.FC<{ onComplete: () => void; pairs: string[]; colors: any }> = ({ onComplete, pairs, colors }) => {
+  // 创建卡片数组：每个配对项出现两次
+  const createCards = () => {
+    const cards = pairs.flatMap((pair, index) => [
+      { id: `${pair}-1`, content: pair, pairId: pair },
+      { id: `${pair}-2`, content: pair, pairId: pair },
+    ]);
+    // 随机打乱
+    return cards.sort(() => Math.random() - 0.5);
+  };
+
+  const [cards, setCards] = useState(createCards);
+  const [flippedCards, setFlippedCards] = useState<string[]>([]); // 翻开的卡片ID
+  const [matchedPairs, setMatchedPairs] = useState<string[]>([]); // 已匹配的配对ID
+  const [isLocked, setIsLocked] = useState(false); // 锁定状态（等待翻回）
+
+  useEffect(() => {
+    // 当所有配对都匹配完成时
+    if (matchedPairs.length === pairs.length && pairs.length > 0) {
+      setTimeout(() => onComplete(), 500);
+    }
+  }, [matchedPairs, pairs, onComplete]);
+
+  const handleCardClick = (cardId: string, pairId: string) => {
+    if (isLocked) return; // 锁定时不响应点击
+    if (matchedPairs.includes(pairId)) return; // 已匹配的不响应
+    if (flippedCards.includes(cardId)) return; // 已翻开的不响应
+
+    const newFlipped = [...flippedCards, cardId];
+    setFlippedCards(newFlipped);
+
+    // 如果翻开了两张卡片
+    if (newFlipped.length === 2) {
+      const firstCard = cards.find(c => c.id === newFlipped[0]);
+      const secondCard = cards.find(c => c.id === cardId);
+
+      if (firstCard && secondCard && firstCard.pairId === secondCard.pairId) {
+        // 匹配成功！
+        setMatchedPairs([...matchedPairs, firstCard.pairId]);
+        setFlippedCards([]);
+      } else {
+        // 匹配失败，延迟翻回
+        setIsLocked(true);
+        setTimeout(() => {
+          setFlippedCards([]);
+          setIsLocked(false);
+        }, 800);
+      }
+    }
+  };
+
+  const handleReset = () => {
+    setCards(createCards());
+    setFlippedCards([]);
+    setMatchedPairs([]);
+    setIsLocked(false);
+  };
+
+  const progress = (matchedPairs.length / pairs.length) * 100;
+
+  const getCardColor = (index: number) => {
+    const colorList = [colors.peach, colors.blue, colors.mint, colors.lilac, colors.coral, colors.sunshine];
+    return colorList[index % colorList.length];
+  };
+
+  return (
+    <div className="space-y-5">
+      {/* 进度条 */}
+      <div
+        className="w-full h-4 rounded-2xl overflow-hidden"
+        style={{
+          background: 'rgba(255, 255, 255, 0.6)',
+          border: '3px solid rgba(200, 180, 180, 0.3)',
+          boxShadow: 'inset -2px -2px 6px rgba(200, 180, 180, 0.2)',
+        }}
+      >
+        <motion.div
+          animate={{ width: `${progress}%` }}
+          transition={{ type: 'spring' }}
+          className="h-full rounded-xl"
+          style={{
+            background: `linear-gradient(145deg, ${colors.lilac}, ${colors.mint})`,
+            boxShadow: 'inset -2px -2px 4px rgba(100, 150, 200, 0.3)',
+          }}
+        />
+      </div>
+
+      {/* 匹配进度 */}
+      <div className="text-center">
+        <p className="text-sm font-medium" style={{ color: '#8B7D9B' }}>
+          已匹配：
+        </p>
+        <motion.p
+          animate={{ scale: matchedPairs.length > 0 ? [1, 1.1, 1] : 1 }}
+          className="text-lg font-black mt-1"
+          style={{ color: '#5D7D8B' }}
+        >
+          {matchedPairs.length}/{pairs.length} 对
+        </motion.p>
+      </div>
+
+      {/* 卡片网格 */}
+      <div
+        className="grid grid-cols-4 gap-3 p-4 rounded-2xl"
+        style={{
+          background: 'rgba(255, 255, 255, 0.7)',
+          border: '3px solid rgba(200, 180, 180, 0.3)',
+          boxShadow: 'inset -2px -2px 8px rgba(200, 180, 180, 0.2)',
+        }}
+      >
+        {cards.map((card, index) => {
+          const isFlipped = flippedCards.includes(card.id);
+          const isMatched = matchedPairs.includes(card.pairId);
+
+          return (
+            <motion.button
+              key={card.id}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: isMatched ? 1 : 1.08 }}
+              whileTap={{ scale: isMatched ? 1 : 0.92 }}
+              onClick={() => handleCardClick(card.id, card.pairId)}
+              disabled={isMatched}
+              className="aspect-square rounded-2xl flex items-center justify-center text-xs font-bold transition-all overflow-hidden"
+            >
+              <motion.div
+                animate={{ rotateY: isFlipped || isMatched ? 0 : 180 }}
+                transition={{ duration: 0.3 }}
+                className="w-full h-full flex items-center justify-center rounded-2xl"
+                style={{
+                  background: isMatched
+                    ? colors.mint
+                    : isFlipped
+                      ? getCardColor(index)
+                      : 'linear-gradient(145deg, #E6E6FA, #D4D4E6)',
+                  border: isMatched
+                    ? '3px solid rgba(100, 200, 100, 0.6)'
+                    : isFlipped
+                      ? '3px solid rgba(255, 255, 255, 0.8)'
+                      : '3px solid rgba(200, 200, 220, 0.6)',
+                  boxShadow: isMatched
+                    ? `inset -2px -2px 6px rgba(100, 150, 100, 0.3), 4px 4px 10px rgba(100, 200, 100, 0.4)`
+                    : isFlipped
+                      ? `inset -2px -2px 6px rgba(200, 150, 150, 0.2), 4px 4px 10px rgba(200, 150, 150, 0.3)`
+                      : `inset 2px 2px 6px rgba(200, 200, 220, 0.3), 4px 4px 10px rgba(200, 200, 220, 0.3)`,
+                  color: isMatched ? '#5D8A66' : isFlipped ? '#4D4D5D' : '#8B8B9B',
+                }}
+              >
+                {isFlipped || isMatched ? (
+                  <span className="text-xs leading-tight text-center px-1">{card.content}</span>
+                ) : (
+                  <span className="text-2xl">?</span>
+                )}
+              </motion.div>
+            </motion.button>
+          );
+        })}
+      </div>
+
+      {/* 提示和重置 */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-medium" style={{ color: '#8B7D9B' }}>
+          点击翻开卡片，找到相同的配对
+        </p>
+        <motion.button
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
+          onClick={handleReset}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl"
+          style={{
+            background: colors.sunshine,
+            border: '3px solid rgba(255, 200, 100, 0.5)',
+            boxShadow: 'inset -2px -2px 6px rgba(200, 150, 100, 0.2), 4px 4px 10px rgba(255, 200, 100, 0.3)',
+            color: '#8B6B4B',
+          }}
+        >
+          <RefreshCw className="w-4 h-4" />
+          重置
+        </motion.button>
+      </div>
+    </div>
+  );
+};
+
+// 抛硬币小游戏组件 - Claymorphism风格
+interface CoinGameProps {
+  onComplete: () => void;
+  targetSide: 'front' | 'back';
+  frontDesign: string;
+  backDesign: string;
+  targetAmount?: string;
+  colors: any;
+}
+
+const CoinGame: React.FC<CoinGameProps> = ({
+  onComplete,
+  targetSide,
+  frontDesign,
+  backDesign,
+  targetAmount,
+  colors,
+}) => {
+  const [flipCount, setFlipCount] = useState(0);
+  const [isFlipping, setIsFlipping] = useState(false);
+  const [currentSide, setCurrentSide] = useState<'front' | 'back' | null>(null);
+  const [hasWon, setHasWon] = useState(false);
+  const [resultHistory, setResultHistory] = useState<'front' | 'back'[]>([]);
+
+  // 保底机制：确保4次内必定成功
+  // 第1次：30%，第2次：50%，第3次：70%，第4次：100%
+  const getWinProbability = (attempt: number): number => {
+    const probabilities = [0.3, 0.5, 0.7, 1.0];
+    return probabilities[Math.min(attempt - 1, 3)];
+  };
+
+  const handleFlip = () => {
+    if (isFlipping || hasWon) return;
+
+    setIsFlipping(true);
+    const newFlipCount = flipCount + 1;
+    setFlipCount(newFlipCount);
+
+    const winProbability = getWinProbability(newFlipCount);
+    const isTargetHit = Math.random() < winProbability;
+
+    let result: 'front' | 'back';
+    if (isTargetHit) {
+      result = targetSide;
+    } else {
+      result = targetSide === 'front' ? 'back' : 'front';
+    }
+
+    setTimeout(() => {
+      setCurrentSide(result);
+      setResultHistory([...resultHistory, result]);
+      setIsFlipping(false);
+
+      if (result === targetSide) {
+        setHasWon(true);
+        setTimeout(() => onComplete(), 1000);
+      }
+    }, 600);
+  };
+
+  const handleReset = () => {
+    setFlipCount(0);
+    setIsFlipping(false);
+    setCurrentSide(null);
+    setHasWon(false);
+    setResultHistory([]);
+  };
+
+  return (
+    <div className="space-y-5">
+      {/* 目标提示 */}
+      <div
+        className="text-center p-3 rounded-2xl"
+        style={{
+          background: colors.lilac,
+          border: '3px solid rgba(200, 200, 255, 0.5)',
+          boxShadow: 'inset -2px -2px 6px rgba(150, 150, 200, 0.2), 4px 4px 10px rgba(200, 200, 255, 0.3)',
+        }}
+      >
+        <p className="text-sm font-medium" style={{ color: '#6D6D8D' }}>
+          目标花色：
+        </p>
+        <p className="text-xl font-black mt-1" style={{ color: '#4D4D6D' }}>
+          {targetSide === 'front' ? frontDesign : backDesign}
+        </p>
+        {targetAmount && (
+          <p className="text-sm font-medium mt-2" style={{ color: '#7D7D9D' }}>
+            获得融资：{targetAmount}
+          </p>
+        )}
+      </div>
+
+      {/* 翻转次数和结果历史 */}
+      <div className="text-center">
+        <p className="text-sm font-medium" style={{ color: '#8B7D9B' }}>
+          已抛掷：{flipCount} 次
+        </p>
+        <div className="flex justify-center gap-2 mt-2">
+          {resultHistory.map((result, index) => (
+            <motion.div
+              key={index}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+              style={{
+                background: result === targetSide ? colors.mint : colors.coral,
+                border: '2px solid rgba(255, 255, 255, 0.5)',
+                color: '#4D4D5D',
+              }}
+            >
+              {result === 'front' ? frontDesign.charAt(0) : backDesign.charAt(0)}
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* 硬币 */}
+      <div className="flex flex-col items-center justify-center py-6">
+        <motion.div
+          animate={{
+            rotateY: isFlipping ? [0, 180, 360, 540, 720] : 0,
+            scale: isFlipping ? [1, 1.2, 1] : 1,
+          }}
+          transition={{
+            duration: isFlipping ? 0.6 : 0,
+            ease: 'easeInOut',
+          }}
+          className="relative"
+          style={{ perspective: '1000px' }}
+        >
+          <motion.div
+            className="w-20 h-20 rounded-full flex items-center justify-center font-black shadow-lg"
+            style={{
+              background: currentSide === null
+                ? 'linear-gradient(145deg, #E6E6FA, #D4D4E6)'
+                : currentSide === 'front'
+                  ? 'linear-gradient(145deg, #FFD700, #FFAA00)'
+                  : 'linear-gradient(145deg, #87CEEB, #ADD8E6)',
+              border: '4px solid rgba(255, 255, 255, 0.8)',
+              boxShadow: `
+                inset -3px -3px 10px rgba(200, 200, 200, 0.3),
+                inset 3px 3px 10px rgba(255, 255, 255, 0.5),
+                6px 6px 20px rgba(150, 150, 150, 0.4)
+              `,
+              color: '#4D4D6D',
+            }}
+          >
+            {currentSide === null ? (
+              <span className="text-2xl">?</span>
+            ) : (
+              <span className="text-sm font-bold">
+                {currentSide === 'front' ? frontDesign : backDesign}
+              </span>
+            )}
+          </motion.div>
+        </motion.div>
+
+        {/* 抛硬币按钮 */}
+        <motion.button
+          whileHover={{ scale: hasWon ? 1 : 1.08 }}
+          whileTap={{ scale: hasWon ? 1 : 0.92 }}
+          onClick={handleFlip}
+          disabled={isFlipping || hasWon}
+          animate={{ scale: hasWon ? [1, 1.1, 1] : 1 }}
+          className="mt-6 px-8 py-4 font-bold rounded-2xl"
+          style={{
+            background: hasWon
+              ? colors.mint
+              : colors.coral,
+            border: hasWon
+              ? '3px solid rgba(100, 200, 100, 0.6)'
+              : '3px solid rgba(255, 150, 150, 0.6)',
+            boxShadow: hasWon
+              ? 'inset -2px -2px 6px rgba(100, 150, 100, 0.3), 4px 4px 10px rgba(100, 200, 100, 0.4)'
+              : 'inset -2px -2px 6px rgba(200, 100, 100, 0.3), 4px 4px 10px rgba(255, 150, 150, 0.4)',
+            color: hasWon ? '#5D8A66' : '#FFFFFF',
+            fontSize: '16px',
+          }}
+        >
+          {hasWon ? '融资成功!' : '抛硬币'}
+        </motion.button>
+
+        {!hasWon && flipCount > 0 && flipCount < 4 && (
+          <p className="text-sm font-medium mt-3" style={{ color: '#8B7D9B' }}>
+            继续尝试，第 {flipCount + 1} 次成功率更高！
+          </p>
+        )}
+      </div>
+
+      {/* 提示和重置 */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-medium" style={{ color: '#8B7D9B' }}>
+          抛到目标花色获得融资
         </p>
         <motion.button
           whileHover={{ scale: 1.08 }}

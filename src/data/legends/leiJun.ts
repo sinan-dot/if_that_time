@@ -42,10 +42,10 @@ export const leiJunLegend: LegendChapter = {
         ],
       },
       minigame: {
-        type: 'sequence',
-        title: '辞职抉择',
-        instruction: '按正确顺序完成辞职流程',
-        data: { sequence: ['整理工作', '交接文档', '告别同事', '递交辞职'] },
+        type: 'memory',
+        title: '记忆翻牌',
+        instruction: '翻开卡片，找到相同的故事关键词配对',
+        data: { pairs: ['金山十年', '风口抉择', '小米诞生', '口碑极致'] },
       },
     },
     {
