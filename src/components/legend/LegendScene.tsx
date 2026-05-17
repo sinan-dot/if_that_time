@@ -39,6 +39,9 @@ export const LegendScene: React.FC<LegendSceneProps> = ({ onRestart, onExit }) =
   const item = getCurrentItem();
   const minigame = getCurrentMinigame();
 
+  // 检测是否是拨号小游戏（需要竖屏）
+  const isDialGame = state.phase === 'minigame' && minigame?.type === 'dial';
+
   const handleBackToSelect = () => {
     resetGame();
   };
@@ -58,7 +61,21 @@ export const LegendScene: React.FC<LegendSceneProps> = ({ onRestart, onExit }) =
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-[#05060a]">
+    // 横屏容器：拨号游戏除外
+    <div
+      className="fixed overflow-hidden bg-[#05060a]"
+      style={{
+        // 非拨号游戏时强制横屏显示
+        transform: isDialGame ? 'none' : 'rotate(90deg)',
+        transformOrigin: 'center center',
+        // 旋转后的尺寸：宽度=视口高度，高度=视口宽度
+        width: isDialGame ? '100vw' : '100vh',
+        height: isDialGame ? '100vh' : '100vw',
+        // 居中定位
+        top: isDialGame ? '0' : 'calc(50vh - 50vw)',
+        left: isDialGame ? '0' : 'calc(50vw - 50vh)',
+      }}
+    >
       {/* 背景层 - 探索和剧情阶段显示 */}
       <AnimatePresence mode="wait">
         {state.phase !== 'selecting' && legend && (

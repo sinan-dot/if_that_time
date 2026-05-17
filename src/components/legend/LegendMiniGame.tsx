@@ -138,10 +138,9 @@ export const LegendMiniGame: React.FC<LegendMiniGameProps> = ({
               className="text-center py-8 space-y-5"
             >
               <motion.button
-                whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.92 }}
                 onClick={startGame}
-                className="px-10 py-5 font-bold text-white rounded-2xl"
+                className="px-10 py-5 font-bold text-white rounded-2xl min-h-[56px]"
                 style={{
                   background: `linear-gradient(145deg, ${clayColors.coral}, #FF6B6B)`,
                   border: '4px solid rgba(255, 150, 150, 0.6)',
@@ -159,7 +158,7 @@ export const LegendMiniGame: React.FC<LegendMiniGameProps> = ({
               {onSkip && (
                 <button
                   onClick={handleSkip}
-                  className="text-sm font-medium hover:underline"
+                  className="text-sm font-medium py-2 min-h-[44px]"
                   style={{ color: '#9B8DAB' }}
                 >
                   跳过小游戏
@@ -312,10 +311,9 @@ const PuzzleGame: React.FC<{ onComplete: () => void; colors: any }> = ({ onCompl
         {pieces.map((piece, index) => (
           <motion.button
             key={index}
-            whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.92 }}
             onClick={() => handleClick(index)}
-            className="aspect-square rounded-2xl flex items-center justify-center text-xl font-black transition-all"
+            className="aspect-square rounded-2xl flex items-center justify-center text-xl font-black transition-all min-h-[60px]"
             style={{
               background: selected === index
                 ? `linear-gradient(145deg, ${getTileColor(piece)}, ${getTileColor(piece)}DD)`
@@ -341,10 +339,9 @@ const PuzzleGame: React.FC<{ onComplete: () => void; colors: any }> = ({ onCompl
           {selected !== null ? '再点击一块进行交换' : '点击选择拼图块'}
         </p>
         <motion.button
-          whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.92 }}
           onClick={handleReset}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl"
+          className="flex items-center gap-2 px-4 py-3 text-sm font-bold rounded-xl min-h-[44px]"
           style={{
             background: colors.sunshine,
             border: '3px solid rgba(255, 200, 100, 0.5)',
@@ -400,7 +397,6 @@ const ClickGame: React.FC<{ onComplete: () => void; targetCount: number; colors:
       {/* 点击按钮 */}
       <div className="flex flex-col items-center justify-center py-6">
         <motion.button
-          whileHover={{ scale: 1.15 }}
           whileTap={{ scale: 0.85 }}
           onClick={handleClick}
           animate={{ scale: clicked % 2 === 0 ? 1 : 1.05 }}
@@ -487,12 +483,11 @@ const ScrewGame: React.FC<{ onComplete: () => void; screwCount: number; colors: 
         {screws.map((clicks, index) => (
           <motion.button
             key={index}
-            whileHover={{ scale: clicks >= clicksPerScrew ? 1 : 1.08 }}
             whileTap={{ scale: clicks >= clicksPerScrew ? 1 : 0.92 }}
             onClick={() => handleScrewClick(index)}
             disabled={clicks >= clicksPerScrew}
             animate={{ rotate: clicks * 120 }}
-            className="aspect-square rounded-2xl flex flex-col items-center justify-center transition-all"
+            className="aspect-square rounded-2xl flex flex-col items-center justify-center transition-all min-h-[80px]"
             style={{
               background: clicks >= clicksPerScrew
                 ? `linear-gradient(145deg, ${colors.mint}, ${colors.mint}CC)`
@@ -548,10 +543,9 @@ const ScrewGame: React.FC<{ onComplete: () => void; screwCount: number; colors: 
           点击螺丝旋转拧紧
         </p>
         <motion.button
-          whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.92 }}
           onClick={handleReset}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl"
+          className="flex items-center gap-2 px-4 py-3 text-sm font-bold rounded-xl min-h-[44px]"
           style={{
             background: colors.sunshine,
             border: '3px solid rgba(255, 200, 100, 0.5)',
@@ -650,11 +644,10 @@ const SequenceGame: React.FC<{ onComplete: () => void; sequence: string[]; color
               key={`${item}-${index}`}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              whileHover={{ scale: isCompleted ? 1 : 1.08 }}
               whileTap={{ scale: isCompleted ? 1 : 0.92 }}
               onClick={() => !isCompleted && handleSelect(item)}
               disabled={isCompleted}
-              className="py-4 px-5 rounded-2xl text-sm font-bold transition-all"
+              className="py-4 px-5 rounded-2xl text-sm font-bold transition-all min-h-[56px]"
               style={{
                 background: isCompleted
                   ? `linear-gradient(145deg, ${colors.mint}, ${colors.mint}CC)`
@@ -689,10 +682,9 @@ const SequenceGame: React.FC<{ onComplete: () => void; sequence: string[]; color
           {currentStep}/{sequence.length} 步骤完成
         </p>
         <motion.button
-          whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.92 }}
           onClick={handleReset}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl"
+          className="flex items-center gap-2 px-4 py-3 text-sm font-bold rounded-xl min-h-[44px]"
           style={{
             background: colors.sunshine,
             border: '3px solid rgba(255, 200, 100, 0.5)',
@@ -812,7 +804,7 @@ const MemoryGame: React.FC<{ onComplete: () => void; pairs: string[]; colors: an
 
       {/* 卡片网格 */}
       <div
-        className="grid grid-cols-4 gap-3 p-4 rounded-2xl"
+        className="grid grid-cols-4 gap-2 p-3 rounded-2xl"
         style={{
           background: 'rgba(255, 255, 255, 0.7)',
           border: '3px solid rgba(200, 180, 180, 0.3)',
@@ -828,11 +820,10 @@ const MemoryGame: React.FC<{ onComplete: () => void; pairs: string[]; colors: an
               key={card.id}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              whileHover={{ scale: isMatched ? 1 : 1.08 }}
               whileTap={{ scale: isMatched ? 1 : 0.92 }}
               onClick={() => handleCardClick(card.id, card.pairId)}
               disabled={isMatched}
-              className="aspect-square rounded-2xl flex items-center justify-center text-xs font-bold transition-all overflow-hidden"
+              className="aspect-square min-h-[60px] rounded-xl flex items-center justify-center text-xs font-bold transition-all overflow-hidden"
             >
               <motion.div
                 animate={{ rotateY: isFlipped || isMatched ? 0 : 180 }}
@@ -874,10 +865,9 @@ const MemoryGame: React.FC<{ onComplete: () => void; pairs: string[]; colors: an
           点击翻开卡片，找到相同的配对
         </p>
         <motion.button
-          whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.92 }}
           onClick={handleReset}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl"
+          className="flex items-center gap-2 px-4 py-3 text-sm font-bold rounded-xl min-h-[44px]"
           style={{
             background: colors.sunshine,
             border: '3px solid rgba(255, 200, 100, 0.5)',
@@ -1068,12 +1058,11 @@ const CoinGame: React.FC<CoinGameProps> = ({
 
         {/* 抛硬币按钮 */}
         <motion.button
-          whileHover={{ scale: hasWon ? 1 : 1.08 }}
           whileTap={{ scale: hasWon ? 1 : 0.92 }}
           onClick={handleFlip}
           disabled={isFlipping || hasWon}
           animate={{ scale: hasWon ? [1, 1.1, 1] : 1 }}
-          className="mt-6 px-8 py-4 font-bold rounded-2xl"
+          className="mt-6 px-8 py-4 font-bold rounded-2xl min-h-[52px]"
           style={{
             background: hasWon
               ? colors.mint
@@ -1104,10 +1093,9 @@ const CoinGame: React.FC<CoinGameProps> = ({
           抛到目标花色获得融资
         </p>
         <motion.button
-          whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.92 }}
           onClick={handleReset}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl"
+          className="flex items-center gap-2 px-4 py-3 text-sm font-bold rounded-xl min-h-[44px]"
           style={{
             background: colors.sunshine,
             border: '3px solid rgba(255, 200, 100, 0.5)',
@@ -1325,11 +1313,10 @@ const DialGame: React.FC<DialGameProps> = ({
             {row.map((key) => (
               <motion.button
                 key={key}
-                whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => handleKeyPress(key)}
                 disabled={isCalling || callSuccess}
-                className="py-3 rounded-xl text-lg font-black transition-all"
+                className="py-4 rounded-xl text-lg font-black transition-all min-h-[52px]"
                 style={{
                   background: colors.blue,
                   border: '2px solid rgba(255, 255, 255, 0.6)',
@@ -1346,11 +1333,10 @@ const DialGame: React.FC<DialGameProps> = ({
         {/* 删除和拨打按钮 */}
         <div className="grid grid-cols-2 gap-2 mt-2">
           <motion.button
-            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleDelete}
             disabled={isCalling || callSuccess || dialedNumber.length === 0}
-            className="py-2 rounded-xl text-sm font-bold"
+            className="py-3 rounded-xl text-sm font-bold min-h-[44px]"
             style={{
               background: colors.coral,
               border: '2px solid rgba(255, 150, 150, 0.4)',
@@ -1362,7 +1348,6 @@ const DialGame: React.FC<DialGameProps> = ({
           </motion.button>
 
           <motion.button
-            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleCall}
             disabled={isCalling || callSuccess || dialedNumber !== phoneNumber}
@@ -1370,7 +1355,7 @@ const DialGame: React.FC<DialGameProps> = ({
               scale: callSuccess ? [1, 1.1, 1] : 1,
               opacity: dialedNumber === phoneNumber ? 1 : 0.5
             }}
-            className="py-2 rounded-xl text-sm font-bold"
+            className="py-3 rounded-xl text-sm font-bold min-h-[44px]"
             style={{
               background: callSuccess ? colors.mint : colors.mint,
               border: callSuccess ? '2px solid rgba(100, 200, 100, 0.5)' : '2px solid rgba(100, 200, 100, 0.4)',
@@ -1388,17 +1373,16 @@ const DialGame: React.FC<DialGameProps> = ({
           输入正确号码后拨打
         </p>
         <motion.button
-          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleReset}
-          className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg"
+          className="flex items-center gap-1 px-4 py-3 text-xs font-bold rounded-lg min-h-[44px]"
           style={{
             background: colors.sunshine,
             border: '2px solid rgba(255, 200, 100, 0.4)',
             color: '#8B6B4B',
           }}
         >
-          <RefreshCw className="w-3 h-3" />
+          <RefreshCw className="w-4 h-4" />
           重置
         </motion.button>
       </div>
