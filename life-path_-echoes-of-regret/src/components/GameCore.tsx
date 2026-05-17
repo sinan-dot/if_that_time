@@ -17,6 +17,10 @@ export const GameCore: React.FC = () => {
   const [combo, setCombo] = useState(0);
   const [miss, setMiss] = useState(0);
   const [currentChapterId, setCurrentChapterId] = useState("event_001");
+
+  // 核心！初始化四大属性，基础分为 50
+  const [stats, setStats] = useState({ car: 50, fam: 50, hea: 50, hap: 50 });
+
   const [showChapterText, setShowChapterText] = useState(false);
   
   // 新增：用于获取手机屏幕外壳的尺寸
@@ -139,6 +143,8 @@ export const GameCore: React.FC = () => {
     setPops([]);
     setCurrentChapterId("event_001"); // 切回第一关
     setShowChapterText(true);
+
+    setStats({ car: 50, fam: 50, hea: 50, hap: 50 }); // 【新增这一行】
 
     // 【最关键的一步】：强制呼叫刷球函数，把第一关的选项刷出来！
     spawnNextNodes("event_001", startY);
@@ -276,6 +282,20 @@ export const GameCore: React.FC = () => {
         node.hit = true;
         triggeredNext = true; // 裁判吹哨：需要进入下一关！
         showPop("命运的抉择", node.x, node.y);
+        
+        // 【新增算分逻辑】：根据撞击的选项，实时加减四大属性！
+        const chapter = CHAPTERS.find(c => c.id === currentChapterId);
+        if (chapter) {
+          const choice = node.type === 'good' ? chapter.choices.good : chapter.choices.bad;
+          if (choice?.impact) {
+            setStats(prev => ({
+              car: prev.car + choice.impact.car,
+              fam: prev.fam + choice.impact.fam,
+              hea: prev.hea + choice.impact.hea,
+              hap: prev.hap + choice.impact.hap,
+            }));
+          }
+        }
       }
       
       // 【情况2：错过防卡死】
@@ -305,6 +325,8 @@ export const GameCore: React.FC = () => {
         setTimeout(() => setShowChapterText(false), 3000);
       } else {
         setGameState('ENDING');
+        if (requestRef.current) cancelAnimationFrame(requestRef.current);
+        return;
       }
     }
     // =========================================================
@@ -414,7 +436,11 @@ export const GameCore: React.FC = () => {
           {gameState === 'START' && <StartScreen onStart={onStart} />}
           {gameState === 'PLAYING' && (
             <>
-              <HUD repair={repair} combo={combo} miss={miss} currentChapterTitle={currentChapter?.title || "末章"} />
+        <HUD 
+  currentStep={CHAPTERS.findIndex(c => c.id === currentChapterId) + 1} 
+  totalSteps={CHAPTERS.length} 
+  age={currentChapter?.age || 'CHILDHOOD'} 
+/>      <HUD repair={repair} combo={combo} miss={miss} currentChapterTitle={currentChapter?.title || "末章"} />
               {showChapterText && currentChapter && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9, y: 50 }}
@@ -433,7 +459,16 @@ export const GameCore: React.FC = () => {
               <BeatVisualizer interval={BEAT_MS} />
             </>
           )}
-          {gameState === 'ENDING' && <ResultScreen repair={repair} miss={miss} onRestart={() => setGameState('START')} />}
+        {gameState === 'ENDING' && (
+  <ResultScreen 
+    stats={stats} 
+    onRestart={() => {
+      initGame();
+      setGameState('START');
+      window.location.reload(); // 强制刷新，最干净利落的重开方式
+    }} 
+  />
+)}
         </AnimatePresence>
 
         {pops.map(pop => (
