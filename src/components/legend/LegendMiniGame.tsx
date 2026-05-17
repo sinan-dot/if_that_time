@@ -917,6 +917,16 @@ const CoinGame: React.FC<CoinGameProps> = ({
   const [hasWon, setHasWon] = useState(false);
   const [resultHistory, setResultHistory] = useState<'front' | 'back'[]>([]);
 
+  // 抛硬币音效
+  const coinFlipAudioRef = React.useRef<HTMLAudioElement | null>(null);
+
+  const playCoinFlipSound = () => {
+    if (coinFlipAudioRef.current) {
+      coinFlipAudioRef.current.currentTime = 0;
+      coinFlipAudioRef.current.play();
+    }
+  };
+
   // 保底机制：确保4次内必定成功
   // 第1次：30%，第2次：50%，第3次：70%，第4次：100%
   const getWinProbability = (attempt: number): number => {
@@ -926,6 +936,9 @@ const CoinGame: React.FC<CoinGameProps> = ({
 
   const handleFlip = () => {
     if (isFlipping || hasWon) return;
+
+    // 播放抛硬币音效
+    playCoinFlipSound();
 
     setIsFlipping(true);
     const newFlipCount = flipCount + 1;
@@ -963,6 +976,9 @@ const CoinGame: React.FC<CoinGameProps> = ({
 
   return (
     <div className="space-y-5">
+      {/* 抛硬币音效 */}
+      <audio ref={coinFlipAudioRef} src="/sounds/coin-flip.mp3" preload="auto" />
+
       {/* 目标提示 */}
       <div
         className="text-center p-3 rounded-2xl"
@@ -1124,7 +1140,8 @@ const DialGame: React.FC<DialGameProps> = ({
   const [dialedNumber, setDialedNumber] = useState('');
   const [isCalling, setIsCalling] = useState(false);
   const [callSuccess, setCallSuccess] = useState(false);
-  const audioRef = React.useRef<HTMLAudioElement | null>(null);
+  const vibrateAudioRef = React.useRef<HTMLAudioElement | null>(null);
+  const keyPressAudioRef = React.useRef<HTMLAudioElement | null>(null);
 
   // 数字键盘布局
   const dialKeys = [
@@ -1134,15 +1151,35 @@ const DialGame: React.FC<DialGameProps> = ({
     ['*', '0', '#'],
   ];
 
+  // 播放按键音效（只播放0.1秒）
+  const playKeyPressSound = () => {
+    if (keyPressAudioRef.current) {
+      keyPressAudioRef.current.currentTime = 0;
+      keyPressAudioRef.current.play();
+      // 0.1秒后停止
+      setTimeout(() => {
+        if (keyPressAudioRef.current) {
+          keyPressAudioRef.current.pause();
+          keyPressAudioRef.current.currentTime = 0;
+        }
+      }, 100);
+    }
+  };
+
   const handleKeyPress = (key: string) => {
     if (isCalling || callSuccess) return;
     if (dialedNumber.length >= 11) return; // 限制最大长度
+
+    // 播放按键音效
+    playKeyPressSound();
 
     setDialedNumber(dialedNumber + key);
   };
 
   const handleDelete = () => {
     if (isCalling || callSuccess) return;
+    // 播放按键音效
+    playKeyPressSound();
     setDialedNumber(dialedNumber.slice(0, -1));
   };
 
@@ -1157,16 +1194,16 @@ const DialGame: React.FC<DialGameProps> = ({
       setCallSuccess(true);
 
       // 播放震动音效
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-        audioRef.current.play();
+      if (vibrateAudioRef.current) {
+        vibrateAudioRef.current.currentTime = 0;
+        vibrateAudioRef.current.play();
       }
 
       // 6秒后停止音效并继续
       setTimeout(() => {
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current.currentTime = 0;
+        if (vibrateAudioRef.current) {
+          vibrateAudioRef.current.pause();
+          vibrateAudioRef.current.currentTime = 0;
         }
         onComplete();
       }, 6000);
@@ -1177,10 +1214,14 @@ const DialGame: React.FC<DialGameProps> = ({
     setDialedNumber('');
     setIsCalling(false);
     setCallSuccess(false);
-    // 停止音效
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+    // 停止所有音效
+    if (vibrateAudioRef.current) {
+      vibrateAudioRef.current.pause();
+      vibrateAudioRef.current.currentTime = 0;
+    }
+    if (keyPressAudioRef.current) {
+      keyPressAudioRef.current.pause();
+      keyPressAudioRef.current.currentTime = 0;
     }
   };
 
@@ -1191,8 +1232,13 @@ const DialGame: React.FC<DialGameProps> = ({
     <div className="space-y-4">
       {/* 音效元素 */}
       <audio
-        ref={audioRef}
+        ref={vibrateAudioRef}
         src="/sounds/vibrate.mp3"
+        preload="auto"
+      />
+      <audio
+        ref={keyPressAudioRef}
+        src="/sounds/dial-key.mp3"
         preload="auto"
       />
 
