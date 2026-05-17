@@ -186,6 +186,13 @@ export const LegendMiniGame: React.FC<LegendMiniGameProps> = ({
                 targetAmount={(config.data as any)?.targetAmount || '融资成功'}
                 colors={clayColors}
               />
+            ) : config.type === 'dial' ? (
+              <DialGame
+                onComplete={handleSuccess}
+                phoneNumber={(config.data as any)?.phoneNumber || '10086'}
+                successMessage={(config.data as any)?.successMessage || '拨号成功'}
+                colors={clayColors}
+              />
             ) : (
               <ClickGame onComplete={handleSuccess} targetCount={(config.data as any)?.targetCount || 5} colors={clayColors} />
             )
@@ -1093,6 +1100,259 @@ const CoinGame: React.FC<CoinGameProps> = ({
           }}
         >
           <RefreshCw className="w-4 h-4" />
+          重置
+        </motion.button>
+      </div>
+    </div>
+  );
+};
+
+// 拨号小游戏组件 - Claymorphism风格
+interface DialGameProps {
+  onComplete: () => void;
+  phoneNumber: string;
+  successMessage?: string;
+  colors: any;
+}
+
+const DialGame: React.FC<DialGameProps> = ({
+  onComplete,
+  phoneNumber,
+  successMessage,
+  colors,
+}) => {
+  const [dialedNumber, setDialedNumber] = useState('');
+  const [isCalling, setIsCalling] = useState(false);
+  const [callSuccess, setCallSuccess] = useState(false);
+  const audioRef = React.useRef<HTMLAudioElement | null>(null);
+
+  // 数字键盘布局
+  const dialKeys = [
+    ['1', '2', '3'],
+    ['4', '5', '6'],
+    ['7', '8', '9'],
+    ['*', '0', '#'],
+  ];
+
+  const handleKeyPress = (key: string) => {
+    if (isCalling || callSuccess) return;
+    if (dialedNumber.length >= 11) return; // 限制最大长度
+
+    setDialedNumber(dialedNumber + key);
+  };
+
+  const handleDelete = () => {
+    if (isCalling || callSuccess) return;
+    setDialedNumber(dialedNumber.slice(0, -1));
+  };
+
+  const handleCall = () => {
+    if (isCalling || callSuccess) return;
+    if (dialedNumber !== phoneNumber) return;
+
+    setIsCalling(true);
+    // 模拟拨号动画
+    setTimeout(() => {
+      setIsCalling(false);
+      setCallSuccess(true);
+
+      // 播放震动音效
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play();
+      }
+
+      // 6秒后停止音效并继续
+      setTimeout(() => {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
+        onComplete();
+      }, 6000);
+    }, 1500);
+  };
+
+  const handleReset = () => {
+    setDialedNumber('');
+    setIsCalling(false);
+    setCallSuccess(false);
+    // 停止音效
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  };
+
+  const progress = (dialedNumber.length / phoneNumber.length) * 100;
+  const isCorrectSoFar = phoneNumber.startsWith(dialedNumber);
+
+  return (
+    <div className="space-y-4">
+      {/* 音效元素 */}
+      <audio
+        ref={audioRef}
+        src="/sounds/vibrate.mp3"
+        preload="auto"
+      />
+
+      {/* 目标号码提示 */}
+      <div
+        className="text-center p-2 rounded-xl"
+        style={{
+          background: colors.lilac,
+          border: '2px solid rgba(200, 200, 255, 0.5)',
+        }}
+      >
+        <p className="text-xs font-medium" style={{ color: '#6D6D8D' }}>
+          请拨打：{phoneNumber}
+        </p>
+      </div>
+
+      {/* 进度条 */}
+      <div
+        className="w-full h-3 rounded-xl overflow-hidden"
+        style={{
+          background: 'rgba(255, 255, 255, 0.6)',
+          border: '2px solid rgba(200, 180, 180, 0.3)',
+        }}
+      >
+        <motion.div
+          animate={{ width: `${progress}%` }}
+          className="h-full rounded-lg"
+          style={{
+            background: isCorrectSoFar && dialedNumber.length > 0
+              ? colors.mint
+              : colors.blue,
+          }}
+        />
+      </div>
+
+      {/* 已拨号码显示 */}
+      <div
+        className="text-center py-3 rounded-xl"
+        style={{
+          background: 'linear-gradient(145deg, #FFFFFF, #F5F5FA)',
+          border: '2px solid rgba(200, 200, 220, 0.4)',
+          boxShadow: 'inset -1px -1px 4px rgba(200, 200, 200, 0.2)',
+        }}
+      >
+        <motion.p
+          animate={{
+            scale: isCalling ? [1, 1.02, 1] : 1,
+            opacity: callSuccess ? 0.7 : 1
+          }}
+          className="text-xl font-black tracking-widest"
+          style={{
+            color: callSuccess
+              ? '#5D8A66'
+              : isCorrectSoFar && dialedNumber.length > 0
+                ? '#4D4D5D'
+                : dialedNumber.length > 0 && !isCorrectSoFar
+                  ? colors.coral
+                  : '#8B8B9B',
+          }}
+        >
+          {callSuccess
+            ? successMessage || '拨号成功'
+            : isCalling
+              ? '正在拨号...'
+              : dialedNumber || '请输入号码'}
+        </motion.p>
+        {dialedNumber.length > 0 && !callSuccess && !isCalling && (
+          <p className="text-xs mt-1" style={{ color: '#8B7D9B' }}>
+            {dialedNumber.length}/{phoneNumber.length} 位
+          </p>
+        )}
+      </div>
+
+      {/* 数字键盘 */}
+      <div
+        className="grid gap-2 p-3 rounded-xl"
+        style={{
+          background: 'rgba(255, 255, 255, 0.7)',
+          border: '2px solid rgba(200, 180, 180, 0.3)',
+        }}
+      >
+        {dialKeys.map((row, rowIndex) => (
+          <div key={rowIndex} className="grid grid-cols-3 gap-2">
+            {row.map((key) => (
+              <motion.button
+                key={key}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => handleKeyPress(key)}
+                disabled={isCalling || callSuccess}
+                className="py-3 rounded-xl text-lg font-black transition-all"
+                style={{
+                  background: colors.blue,
+                  border: '2px solid rgba(255, 255, 255, 0.6)',
+                  boxShadow: 'inset -1px -1px 4px rgba(150, 150, 200, 0.2), 2px 2px 6px rgba(150, 150, 200, 0.2)',
+                  color: '#4D4D5D',
+                }}
+              >
+                {key}
+              </motion.button>
+            ))}
+          </div>
+        ))}
+
+        {/* 删除和拨打按钮 */}
+        <div className="grid grid-cols-2 gap-2 mt-2">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleDelete}
+            disabled={isCalling || callSuccess || dialedNumber.length === 0}
+            className="py-2 rounded-xl text-sm font-bold"
+            style={{
+              background: colors.coral,
+              border: '2px solid rgba(255, 150, 150, 0.4)',
+              color: '#FFFFFF',
+              opacity: dialedNumber.length === 0 ? 0.5 : 1,
+            }}
+          >
+            删除
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleCall}
+            disabled={isCalling || callSuccess || dialedNumber !== phoneNumber}
+            animate={{
+              scale: callSuccess ? [1, 1.1, 1] : 1,
+              opacity: dialedNumber === phoneNumber ? 1 : 0.5
+            }}
+            className="py-2 rounded-xl text-sm font-bold"
+            style={{
+              background: callSuccess ? colors.mint : colors.mint,
+              border: callSuccess ? '2px solid rgba(100, 200, 100, 0.5)' : '2px solid rgba(100, 200, 100, 0.4)',
+              color: '#5D8A66',
+            }}
+          >
+            {callSuccess ? '成功' : '拨打'}
+          </motion.button>
+        </div>
+      </div>
+
+      {/* 提示和重置 */}
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-medium" style={{ color: '#8B7D9B' }}>
+          输入正确号码后拨打
+        </p>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleReset}
+          className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg"
+          style={{
+            background: colors.sunshine,
+            border: '2px solid rgba(255, 200, 100, 0.4)',
+            color: '#8B6B4B',
+          }}
+        >
+          <RefreshCw className="w-3 h-3" />
           重置
         </motion.button>
       </div>

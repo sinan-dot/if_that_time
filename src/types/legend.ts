@@ -58,7 +58,7 @@ export interface LegendConsequence {
 
 /** 小游戏配置 */
 export interface MiniGameConfig {
-  type: 'drag' | 'click' | 'sequence' | 'timing' | 'puzzle' | 'screw' | 'memory' | 'coin';
+  type: 'drag' | 'click' | 'sequence' | 'timing' | 'puzzle' | 'screw' | 'memory' | 'coin' | 'dial';
   title: string;
   instruction: string;
   duration?: number;
@@ -66,7 +66,7 @@ export interface MiniGameConfig {
 }
 
 /** 小游戏数据 */
-export type MiniGameData = DragGameData | ClickGameData | SequenceGameData | TimingGameData | ScrewGameData | MemoryGameData | CoinGameData;
+export type MiniGameData = DragGameData | ClickGameData | SequenceGameData | TimingGameData | ScrewGameData | MemoryGameData | CoinGameData | DialGameData;
 
 export interface DragGameData {
   targets: Array<{
@@ -108,6 +108,13 @@ export interface CoinGameData {
   backDesign: string;
   /** 目标融资金额显示 */
   targetAmount?: string;
+}
+
+export interface DialGameData {
+  /** 需要拨打的电话号码 */
+  phoneNumber: string;
+  /** 拨打成功后的提示信息 */
+  successMessage?: string;
 }
 
 /** 结局配置 */

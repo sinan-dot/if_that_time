@@ -76,6 +76,12 @@ export const leiJunLegend: LegendChapter = {
           },
         ],
       },
+      minigame: {
+        type: 'dial',
+        title: '手机拨号',
+        instruction: '在手机上拨打正确号码联系合作伙伴',
+        data: { phoneNumber: '13800138000', successMessage: '联系成功，获得投资意向' },
+      },
     },
     {
       id: 'leijun_item3',
