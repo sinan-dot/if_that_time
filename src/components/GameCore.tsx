@@ -5,19 +5,39 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { CHAPTERS, GAME_CONSTANTS, BEAT_MS } from '../constants';
-import { NodeData, GameState } from '../types';
+import { CHAPTERS, GAME_CONSTANTS, BEAT_MS, getChaptersByRoute, getStartChapterId } from '../constants';
+import { NodeData, GameState, RouteType } from '../types';
 import { HUD } from './HUD';
 import { ResultScreen } from './ResultScreen';
-import { StartScreen } from './StartScreen';
+import { LegendScene } from './legend';
 
-export const GameCore: React.FC = () => {
-  const [gameState, setGameState] = useState<GameState>('START');
+interface GameCoreProps {
+  route: RouteType;
+  onRestart?: () => void;
+}
+
+export const GameCore: React.FC<GameCoreProps> = ({ route, onRestart }) => {
+  // 路由分发：伟人支线使用完全独立的组件系统
+  if (route === 'legend') {
+    return (
+      <LegendScene
+        onRestart={onRestart || (() => {})}
+        onExit={onRestart || (() => {})}
+      />
+    );
+  }
+
+  // 以下为主线（平凡之路）逻辑，与支线完全隔离
+  // 根据路线获取对应的关卡数据
+  const chapters = getChaptersByRoute(route);
+  const startChapterId = getStartChapterId(route);
+
+  const [gameState, setGameState] = useState<GameState>('PLAYING');
   const [repair, setRepair] = useState(0);
   const [combo, setCombo] = useState(0);
   const [miss, setMiss] = useState(0);
-  const [currentChapterId, setCurrentChapterId] = useState("childhood_start");
-  const [showChapterText, setShowChapterText] = useState(false);
+  const [currentChapterId, setCurrentChapterId] = useState(startChapterId);
+  const [showChapterText, setShowChapterText] = useState(true);
   
   // 新增：用于获取手机屏幕外壳的尺寸
   const containerRef = useRef<HTMLDivElement>(null);
@@ -42,7 +62,7 @@ export const GameCore: React.FC = () => {
   const [pops, setPops] = useState<{ id: number; text: string; x: number; y: number; worldY: number }[]>([]);
 
   const spawnNextNodes = useCallback((chapterId: string, currentY: number) => {
-    const chapter = CHAPTERS.find(c => c.id === chapterId);
+    const chapter = chapters.find(c => c.id === chapterId);
     if (!chapter || !containerRef.current) return;
 
     const baseY = currentY - 800;
@@ -90,8 +110,8 @@ export const GameCore: React.FC = () => {
     stateRef.current.nodes = [];
     stateRef.current.lastSpawnY = 0;
 
-    setCurrentChapterId("childhood_start");
-    spawnNextNodes("childhood_start", stateRef.current.y);
+    setCurrentChapterId(startChapterId);
+    spawnNextNodes(startChapterId, stateRef.current.y);
 
     setRepair(0);
     setCombo(0);
@@ -99,7 +119,16 @@ export const GameCore: React.FC = () => {
     setShowChapterText(true);
     setTimeout(() => setShowChapterText(false), 3000);
     lastBeatRef.current = performance.now();
-  }, [spawnNextNodes]);
+  }, [spawnNextNodes, startChapterId]);
+
+  // 组件挂载时自动初始化游戏并播放音乐
+  useEffect(() => {
+    initGame();
+    if (audioRef.current) {
+      audioRef.current.volume = 0.5;
+      audioRef.current.play().catch(e => console.log("音乐播放失败:", e));
+    }
+  }, [initGame]);
 
   const showPop = (text: string, x: number, worldY: number) => {
     const id = Date.now() + Math.random();
@@ -223,7 +252,7 @@ export const GameCore: React.FC = () => {
       const distY = newY - node.y;
       if (Math.sqrt(distX*distX + distY*distY) < 40) {
         node.hit = true;
-        const chapter = CHAPTERS.find(c => c.id === currentChapterId);
+        const chapter = chapters.find(c => c.id === currentChapterId);
         
         if (node.type === 'good') {
           setRepair(r => Math.min(100, r + GAME_CONSTANTS.REPAIR_INC));
@@ -287,18 +316,7 @@ export const GameCore: React.FC = () => {
     }
   }, [gameState, update]);
 
-  const currentChapter = CHAPTERS.find(c => c.id === currentChapterId);
-
-  const onStart = () => {
-    initGame();
-    setGameState('PLAYING');
-
-  // 【新增这几行】：当玩家点击开始按钮时，播放音乐
-  if (audioRef.current) {
-    audioRef.current.volume = 0.5; // 设置音量为 50%，防止音乐太大盖过后面的音效或显得刺耳
-    audioRef.current.play().catch(e => console.log("音乐播放失败:", e));
-  }
-};
+  const currentChapter = chapters.find(c => c.id === currentChapterId);
 
   // 【手机端滑动操控核心】：支持鼠标拖拽和手指滑动
   const handlePointer = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
@@ -356,7 +374,6 @@ export const GameCore: React.FC = () => {
 
 
         <AnimatePresence>
-          {gameState === 'START' && <StartScreen onStart={onStart} />}
           {gameState === 'PLAYING' && (
             <>
               <HUD repair={repair} combo={combo} miss={miss} currentChapterTitle={currentChapter?.title || "末章"} />
@@ -378,7 +395,7 @@ export const GameCore: React.FC = () => {
               <BeatVisualizer interval={BEAT_MS} />
             </>
           )}
-          {gameState === 'ENDING' && <ResultScreen repair={repair} miss={miss} onRestart={() => setGameState('START')} />}
+          {gameState === 'ENDING' && <ResultScreen repair={repair} miss={miss} route={route} onRestart={onRestart || (() => setGameState('START'))} />}
         </AnimatePresence>
 
         {pops.map(pop => (

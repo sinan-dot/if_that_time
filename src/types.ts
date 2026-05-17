@@ -24,6 +24,8 @@ export interface Chapter {
 
 export type GameState = 'START' | 'PLAYING' | 'ENDING';
 
+export type RouteType = 'ordinary' | 'legend';
+
 export interface NodeData {
   id: string;
   x: number;
