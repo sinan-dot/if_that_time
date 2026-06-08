@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import { LegendItem, LegendChoice } from '../../types/legend';
+import { LegendItem } from '../../types/legend';
 
 interface LegendChoiceModalProps {
   item: LegendItem;
@@ -21,80 +21,77 @@ export const LegendChoiceModal: React.FC<LegendChoiceModalProps> = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/90 p-3 backdrop-blur-md md:items-center md:p-4"
     >
       <motion.div
-        initial={{ scale: 0.9, y: 30 }}
+        initial={{ scale: 0.96, y: 30 }}
         animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.9, y: 30 }}
+        exit={{ scale: 0.96, y: 30 }}
         transition={{ type: 'spring', damping: 25 }}
-        className="w-full max-w-md p-6 rounded-3xl bg-gradient-to-b from-white/15 to-white/5 border border-white/20 shadow-2xl"
+        className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-md flex-col overflow-hidden rounded-[28px] border border-white/20 bg-gradient-to-b from-white/15 to-white/5 shadow-2xl md:max-h-[85dvh]"
       >
-        {/* 关键抉择标识 */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-4"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-yellow-500/20 border border-yellow-400/30">
-            <span className="text-xs uppercase tracking-widest text-yellow-400 font-bold">
-              关键抉择
-            </span>
-          </div>
-        </motion.div>
+        <div className="overflow-y-auto px-5 pb-5 pt-6 md:px-6">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 text-center"
+          >
+            <div className="inline-flex items-center gap-2 rounded-full border border-yellow-400/30 bg-yellow-500/20 px-4 py-1.5">
+              <span className="text-xs font-bold uppercase tracking-widest text-yellow-400">
+                关键抉择
+              </span>
+            </div>
+          </motion.div>
 
-        {/* 物品名称 */}
-        <motion.h3
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="text-xl font-black text-white font-display text-center mb-6"
-        >
-          {item.name}
-        </motion.h3>
+          <motion.h3
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="mb-6 text-center font-display text-xl font-black text-white md:text-2xl"
+          >
+            {item.name}
+          </motion.h3>
 
-        {/* 选择按钮 */}
-        <div className="space-y-4">
-          {item.story.choices.map((choice, index) => (
-            <motion.button
-              key={choice.id}
-              initial={{ opacity: 0, x: index === 0 ? -30 : 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 + index * 0.1 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => onChoose(choice.id)}
-              className={`w-full py-4 px-5 rounded-2xl font-bold text-left transition-all ${
-                index === 0
-                  ? 'bg-blue-500/25 hover:bg-blue-500/35 border-2 border-blue-400/40 text-blue-100'
-                  : 'bg-pink-500/25 hover:bg-pink-500/35 border-2 border-pink-400/40 text-pink-100'
-              }`}
-            >
-              <div className="flex items-start gap-3">
-                <span
-                  className={`flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center font-black text-sm ${
-                    index === 0 ? 'bg-blue-500 text-white' : 'bg-pink-500 text-white'
-                  }`}
-                >
-                  {index === 0 ? 'A' : 'B'}
-                </span>
-                <div className="flex-1 text-sm leading-relaxed whitespace-pre-line">
-                  {choice.text}
+          <div className="space-y-3">
+            {item.story.choices.map((choice, index) => (
+              <motion.button
+                key={choice.id}
+                initial={{ opacity: 0, x: index === 0 ? -30 : 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 + index * 0.1 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => onChoose(choice.id)}
+                className={`w-full rounded-2xl border-2 px-4 py-4 text-left transition-all ${
+                  index === 0
+                    ? 'border-blue-400/40 bg-blue-500/25 text-blue-100 hover:bg-blue-500/35'
+                    : 'border-pink-400/40 bg-pink-500/25 text-pink-100 hover:bg-pink-500/35'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <span
+                    className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-sm font-black ${
+                      index === 0 ? 'bg-blue-500 text-white' : 'bg-pink-500 text-white'
+                    }`}
+                  >
+                    {index === 0 ? 'A' : 'B'}
+                  </span>
+                  <div className="flex-1 whitespace-pre-line text-sm leading-6 md:text-[15px]">
+                    {choice.text}
+                  </div>
                 </div>
-              </div>
-            </motion.button>
-          ))}
-        </div>
+              </motion.button>
+            ))}
+          </div>
 
-        {/* 提示 */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="text-center text-xs text-white/40 mt-6"
-        >
-          你的选择将影响命运的走向
-        </motion.p>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-6 text-center text-xs text-white/40"
+          >
+            你的选择将影响命运的走向
+          </motion.p>
+        </div>
       </motion.div>
     </motion.div>
   );

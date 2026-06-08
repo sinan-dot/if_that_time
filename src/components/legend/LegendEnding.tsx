@@ -23,88 +23,73 @@ export const LegendEnding: React.FC<LegendEndingProps> = ({
   stats,
   onRestart,
 }) => {
-  const totalScore = stats.courage + stats.wisdom + stats.persistence;
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-black/95 backdrop-blur-xl"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/95 p-3 backdrop-blur-xl md:items-center md:p-6"
     >
       <motion.div
-        initial={{ scale: 0.9, y: 30 }}
+        initial={{ scale: 0.94, y: 30 }}
         animate={{ scale: 1, y: 0 }}
-        className="w-full max-w-md space-y-6"
+        className="relative w-full max-w-md overflow-hidden rounded-[28px] border border-white/20 shadow-2xl"
       >
-        {/* 背景图 */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.3 }}
-          className="absolute inset-0 z-0"
-        >
-          <img
-            src={legend.backgroundImage}
-            alt=""
-            className="w-full h-full object-cover"
-          />
-        </motion.div>
+        <div className="absolute inset-0 z-0">
+          <img src={legend.backgroundImage} alt="" className="h-full w-full object-cover opacity-25" />
+          <div className="absolute inset-0 bg-black/70" />
+        </div>
 
-        {/* 内容 */}
-        <div className="relative z-10 p-8 rounded-3xl bg-gradient-to-b from-white/10 to-white/5 border border-white/20">
-          {/* 结局标题 */}
+        <div className="relative z-10 max-h-[calc(100dvh-1.5rem)] overflow-y-auto px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-6 md:px-8 md:pb-8">
           <motion.div
             initial={{ y: -20 }}
             animate={{ y: 0 }}
-            className="text-center space-y-2 mb-6"
+            className="mb-6 space-y-2 text-center"
           >
-            <Trophy className="w-12 h-12 text-yellow-400 mx-auto" />
-            <h2 className="text-2xl font-black text-white font-display">
+            <Trophy className="mx-auto h-12 w-12 text-yellow-400" />
+            <h2 className="font-display text-2xl font-black text-white">
               {legend.ending.title}
             </h2>
             <p className="text-sm text-white/70">{legend.name} 支线完成</p>
           </motion.div>
 
-          {/* 结局总结 */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-white/80 text-center leading-relaxed mb-6"
+            className="mb-6 text-center text-[15px] leading-7 text-white/80"
           >
             {legend.ending.summary}
           </motion.p>
 
-          {/* 属性统计 */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="grid grid-cols-3 gap-3 mb-6"
+            className="mb-6 grid grid-cols-3 gap-2.5"
           >
-            <div className="flex flex-col items-center p-3 rounded-xl bg-white/5">
-              <Heart className="w-5 h-5 text-red-400 mb-1" />
+            <div className="flex flex-col items-center rounded-2xl bg-white/8 px-2 py-3">
+              <Heart className="mb-1 h-5 w-5 text-red-400" />
               <span className="text-xs text-white/50">勇气</span>
               <span className="text-lg font-bold text-white">{stats.courage}</span>
             </div>
-            <div className="flex flex-col items-center p-3 rounded-xl bg-white/5">
-              <Lightbulb className="w-5 h-5 text-yellow-400 mb-1" />
+            <div className="flex flex-col items-center rounded-2xl bg-white/8 px-2 py-3">
+              <Lightbulb className="mb-1 h-5 w-5 text-yellow-400" />
               <span className="text-xs text-white/50">智慧</span>
               <span className="text-lg font-bold text-white">{stats.wisdom}</span>
             </div>
-            <div className="flex flex-col items-center p-3 rounded-xl bg-white/5">
-              <Mountain className="w-5 h-5 text-blue-400 mb-1" />
+            <div className="flex flex-col items-center rounded-2xl bg-white/8 px-2 py-3">
+              <Mountain className="mb-1 h-5 w-5 text-blue-400" />
               <span className="text-xs text-white/50">坚持</span>
               <span className="text-lg font-bold text-white">{stats.persistence}</span>
             </div>
           </motion.div>
 
-          {/* 人生启示 */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="space-y-2 mb-6"
+            className="mb-6 space-y-3"
           >
             {legend.ending.quotes.map((quote, index) => (
               <motion.div
@@ -112,25 +97,23 @@ export const LegendEnding: React.FC<LegendEndingProps> = ({
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 + index * 0.1 }}
-                className="flex items-start gap-2 text-sm text-white/70"
+                className="flex items-start gap-2 text-sm leading-6 text-white/72"
               >
-                <Quote className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
+                <Quote className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-400" />
                 <span className="italic">{quote}</span>
               </motion.div>
             ))}
           </motion.div>
 
-          {/* 重新开始按钮 */}
           <motion.button
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={onRestart}
-            className="w-full py-4 flex items-center justify-center gap-2 font-bold text-blue-900 bg-white rounded-2xl shadow-lg"
+            className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-white py-4 font-bold text-blue-900 shadow-lg"
           >
-            <RotateCcw className="w-5 h-5" />
+            <RotateCcw className="h-5 w-5" />
             <span>返回选择</span>
           </motion.button>
         </div>

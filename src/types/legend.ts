@@ -66,7 +66,11 @@ export interface MiniGameConfig {
 }
 
 /** 小游戏数据 */
-export type MiniGameData = DragGameData | ClickGameData | SequenceGameData | TimingGameData | ScrewGameData | MemoryGameData | CoinGameData | DialGameData;
+export type MiniGameData = DragGameData | ClickGameData | SequenceGameData | TimingGameData | ScrewGameData | MemoryGameData | CoinGameData | DialGameData | PuzzleGameData;
+
+export interface PuzzleGameData {
+  image?: string;
+}
 
 export interface DragGameData {
   targets: Array<{

@@ -15,32 +15,80 @@ interface LegendProgressProps {
     wisdom: number;
     persistence: number;
   };
-  onBack?: () => void;
+  compact?: boolean;
 }
 
 export const LegendProgress: React.FC<LegendProgressProps> = ({
   total,
   completed,
   stats,
-  onBack,
+  compact = false,
 }) => {
+  if (compact) {
+    return (
+      <motion.div
+        initial={{ y: -16, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="rounded-2xl border border-white/10 bg-black/35 px-3 py-3 shadow-xl backdrop-blur-md"
+      >
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <div className="flex gap-1">
+              {Array.from({ length: total }).map((_, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: index * 0.06 }}
+                  className={`h-2.5 w-2.5 rounded-full ${
+                    index < completed ? 'bg-emerald-400' : 'bg-white/20'
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="text-[11px] font-medium text-white/60">
+              {completed}/{total}
+            </span>
+          </div>
+          <span className="text-[11px] uppercase tracking-[0.28em] text-white/35">
+            传奇进度
+          </span>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2">
+          <div className="flex items-center justify-center gap-1.5 rounded-xl bg-white/6 px-2 py-2">
+            <Heart className="h-3.5 w-3.5 text-red-400" />
+            <span className="text-[11px] font-bold text-white/85">{stats.courage}</span>
+          </div>
+          <div className="flex items-center justify-center gap-1.5 rounded-xl bg-white/6 px-2 py-2">
+            <Lightbulb className="h-3.5 w-3.5 text-yellow-400" />
+            <span className="text-[11px] font-bold text-white/85">{stats.wisdom}</span>
+          </div>
+          <div className="flex items-center justify-center gap-1.5 rounded-xl bg-white/6 px-2 py-2">
+            <Mountain className="h-3.5 w-3.5 text-blue-400" />
+            <span className="text-[11px] font-bold text-white/85">{stats.persistence}</span>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="absolute top-16 left-4 right-4 flex items-center justify-between z-20"
+      className="absolute left-4 right-4 top-16 z-20 flex items-center justify-between"
     >
-      {/* 左侧：进度 */}
       <div className="flex items-center gap-2">
         <div className="flex gap-1">
-          {Array.from({ length: total }).map((_, i) => (
+          {Array.from({ length: total }).map((_, index) => (
             <motion.div
-              key={i}
+              key={index}
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ delay: i * 0.1 }}
-              className={`w-3 h-3 rounded-full ${
-                i < completed ? 'bg-green-400' : 'bg-white/20'
+              transition={{ delay: index * 0.1 }}
+              className={`h-3 w-3 rounded-full ${
+                index < completed ? 'bg-green-400' : 'bg-white/20'
               }`}
             />
           ))}
@@ -50,24 +98,18 @@ export const LegendProgress: React.FC<LegendProgressProps> = ({
         </span>
       </div>
 
-      {/* 右侧：属性统计 */}
       <div className="flex items-center gap-3">
-        {/* 勇气 */}
         <div className="flex items-center gap-1">
-          <Heart className="w-4 h-4 text-red-400" />
-          <span className="text-xs text-white/80 font-bold">{stats.courage}</span>
+          <Heart className="h-4 w-4 text-red-400" />
+          <span className="text-xs font-bold text-white/80">{stats.courage}</span>
         </div>
-
-        {/* 智慧 */}
         <div className="flex items-center gap-1">
-          <Lightbulb className="w-4 h-4 text-yellow-400" />
-          <span className="text-xs text-white/80 font-bold">{stats.wisdom}</span>
+          <Lightbulb className="h-4 w-4 text-yellow-400" />
+          <span className="text-xs font-bold text-white/80">{stats.wisdom}</span>
         </div>
-
-        {/* 坚持 */}
         <div className="flex items-center gap-1">
-          <Mountain className="w-4 h-4 text-blue-400" />
-          <span className="text-xs text-white/80 font-bold">{stats.persistence}</span>
+          <Mountain className="h-4 w-4 text-blue-400" />
+          <span className="text-xs font-bold text-white/80">{stats.persistence}</span>
         </div>
       </div>
     </motion.div>

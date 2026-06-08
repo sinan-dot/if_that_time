@@ -1,109 +1,206 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 interface ResultScreenProps {
   stats: { car: number; fam: number; hea: number; hap: number };
+  choiceHistory?: string[];
   onRestart: () => void;
 }
 
-export const ResultScreen: React.FC<ResultScreenProps> = ({ stats, onRestart }) => {
-  const [show, setShow] = useState(false);
-  
-  useEffect(() => {
-    const timer = setTimeout(() => setShow(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
+type StatKey = keyof ResultScreenProps['stats'];
 
-  // 安全计算总分
-  const total = (stats?.car || 0) + (stats?.fam || 0) + (stats?.hea || 0) + (stats?.hap || 0);
+const STAT_THEMES: Record<StatKey, { high: string; low: string }> = {
+  car: {
+    high: '你把许多个清晨献给了远方，也把野心磨成了手心里的光。',
+    low: '财富始终只是途经你的一阵风，没有真正停靠太久。',
+  },
+  fam: {
+    high: '人海散去之后，仍有人把你的名字轻轻放在灯火里。',
+    low: '有些黄昏没能等到你回头，门前的灯也暗过几次。',
+  },
+  hea: {
+    high: '你的身体替你记住了风雨，也陪你穿过很长很长的路。',
+    low: '只是这一路太用力，体魄在无声处替你偿还了代价。',
+  },
+  hap: {
+    high: '你仍然保住了一小块柔软的内心，像黑夜里没有熄灭的火。',
+    low: '快乐曾被你轻轻搁置，久到几乎忘了它最初的模样。',
+  },
+};
 
-  let summaryTitle = "";
-  let summaryText = "";
-  let glowColor = "";
+function normalizeStats(stats: ResultScreenProps['stats']) {
+  return {
+    car: Number.isFinite(stats?.car) ? stats.car : 0,
+    fam: Number.isFinite(stats?.fam) ? stats.fam : 0,
+    hea: Number.isFinite(stats?.hea) ? stats.hea : 0,
+    hap: Number.isFinite(stats?.hap) ? stats.hap : 0,
+  };
+}
 
-  // 去掉了字中间的空格，防止被挤换行
-  if (total >= 210) {
-    summaryTitle = "璀璨人生"; 
-    summaryText = "你走过了一段极尽绚烂的旅程。有些遗憾，但更多的是无悔。你的名字，成为了别人仰望的星空。";
-    glowColor = "shadow-[0_0_40px_rgba(59,130,246,0.25)] border-blue-500/20"; 
-  } else if (total >= 180) {
-    summaryTitle = "平凡可贵";
-    summaryText = "没有惊天动地，但也避开了大风大浪。你守护住了属于自己的小确幸，这已经是最大的成功。";
-    glowColor = "shadow-[0_0_40px_rgba(16,185,129,0.2)] border-emerald-500/20"; 
-  } else if (total >= 160) {
-    summaryTitle = "跌宕起伏";
-    summaryText = "命运对你并不温柔，你吃过苦，流过泪。但那些杀不死你的，最终让你拥有了最厚重的灵魂。";
-    glowColor = "shadow-[0_0_40px_rgba(245,158,11,0.2)] border-amber-500/20"; 
-  } else {
-    summaryTitle = "意难平";
-    summaryText = "如果能重来一次，一定要对自己好一点。这辈子太辛苦了，下辈子，记得多看看沿途的风景。";
-    glowColor = "shadow-[0_0_40px_rgba(156,163,175,0.2)] border-gray-500/20"; 
+function buildClosingLine(stats: ResultScreenProps['stats'], choiceHistory: string[] = []) {
+  const safeStats = normalizeStats(stats);
+  const statEntries = Object.entries(safeStats) as Array<[StatKey, number]>;
+  const [highestKey] = statEntries.reduce((best, item) => (item[1] > best[1] ? item : best), statEntries[0]);
+  const [lowestKey] = statEntries.reduce((worst, item) => (item[1] < worst[1] ? item : worst), statEntries[0]);
+  const rememberedChoice = choiceHistory[Math.max(0, Math.floor(choiceHistory.length * 0.68) - 1)] || choiceHistory[0];
+  const highestLine = STAT_THEMES[highestKey].high;
+  const lowestLine = STAT_THEMES[lowestKey].low;
+
+  if (rememberedChoice && safeStats.hap + safeStats.fam >= safeStats.car + safeStats.hea) {
+    return `你仍记得「${rememberedChoice}」那一刻。${highestLine}`;
   }
 
-  const StatRow = ({ label, value, color }: { label: string, value: number, color: string }) => (
-    <div className="mb-5 relative z-10">
-      <div className="flex justify-between text-sm mb-2 px-1 tracking-widest">
-        <span className="text-white/80 font-light">{label}</span>
-        <span className={`font-bold ${color} drop-shadow-md`}>{value}</span>
-      </div>
-      <div className="h-2 w-full bg-black/60 rounded-full overflow-hidden border border-white/5 shadow-inner">
-        <div 
-          className={`h-full ${color.replace('text-', 'bg-')} transition-all duration-[2000ms] cubic-bezier(0.4, 0, 0.2, 1)`}
-          style={{ 
-            width: show ? `${Math.min(100, value)}%` : '0%',
-            boxShadow: show ? '0 0 10px currentColor' : 'none'
-          }}
-        />
-      </div>
-    </div>
-  );
+  if (rememberedChoice) {
+    return `「${rememberedChoice}」最终留在了你心里。${lowestLine}`;
+  }
+
+  return safeStats.hap + safeStats.fam >= safeStats.car + safeStats.hea
+    ? `你把温柔留给了回望。${highestLine}`
+    : `你把沉默留给了岁月。${lowestLine}`;
+}
+
+export const ResultScreen: React.FC<ResultScreenProps> = ({
+  stats,
+  choiceHistory = [],
+  onRestart,
+}) => {
+  const safeStats = normalizeStats(stats);
+  const replayLines = useMemo(() => {
+    const lines = choiceHistory.filter(Boolean);
+    return lines.length ? lines : ['有些抉择没有留下名字，却依旧悄悄改变了你的一生。'];
+  }, [choiceHistory]);
+  const closingLine = useMemo(() => buildClosingLine(safeStats, replayLines), [replayLines, safeStats]);
+
+  const [visibleCount, setVisibleCount] = useState(1);
+  const [showClosing, setShowClosing] = useState(false);
+  const [showSignature, setShowSignature] = useState(false);
+  const [showRestart, setShowRestart] = useState(false);
+
+  useEffect(() => {
+    setVisibleCount(Math.max(1, Math.min(1, replayLines.length)));
+    setShowClosing(false);
+    setShowSignature(false);
+    setShowRestart(false);
+
+    const timers: number[] = [];
+    const introDelay = 640;
+    const stepDelay = replayLines.length > 10 ? 620 : 760;
+
+    replayLines.slice(1).forEach((_, index) => {
+      timers.push(window.setTimeout(() => setVisibleCount(index + 2), introDelay + index * stepDelay));
+    });
+
+    const closingDelay = introDelay + Math.max(0, replayLines.length - 1) * stepDelay + 1100;
+    timers.push(window.setTimeout(() => setShowClosing(true), closingDelay));
+    timers.push(window.setTimeout(() => setShowSignature(true), closingDelay + 1200));
+    timers.push(window.setTimeout(() => setShowRestart(true), closingDelay + 1950));
+
+    return () => {
+      timers.forEach(window.clearTimeout);
+    };
+  }, [replayLines]);
+
+  const visibleWindowStart = Math.max(0, visibleCount - 5);
+  const visibleLines = replayLines.slice(visibleWindowStart, visibleCount);
+  const liftOffset = Math.min(Math.max(0, visibleCount - 1) * 10, 44);
+  const statText = `财富 ${safeStats.car}·羁绊 ${safeStats.fam}·体魄 ${safeStats.hea}·内心 ${safeStats.hap}`;
 
   return (
-    <div className={`absolute inset-0 z-[100] flex items-center justify-center bg-[#05060f] transition-opacity duration-1000 ${show ? 'opacity-100' : 'opacity-0'}`}>
-      
-      {/* 极简深邃的星空渐变背景 & 呼吸光晕 */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900/40 via-[#05060f] to-[#05060f]" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[100px] pointer-events-none animate-pulse" style={{ animationDuration: '4s' }} />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none animate-pulse" style={{ animationDuration: '5s' }} />
+    <div className="absolute inset-0 z-[100] overflow-hidden bg-[#010101] text-white">
+      <style>{`
+        @keyframes endingLineFade {
+          0% { opacity: 0; transform: translateY(28px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
 
-      <div className="w-full max-w-[340px] px-6 text-center relative z-10 flex flex-col items-center">
-        
-        {/* 顶部标题区：改为现代无衬线字体，单行强制显示 */}
-        <div className="mb-8 flex flex-col items-center w-full">
-          <span className="text-white/40 text-[10px] tracking-[0.8em] uppercase mb-4 pl-2">最终结局</span>
-          <h2 className="text-4xl md:text-5xl font-sans font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-white/90 to-white/40 tracking-[0.25em] pl-3 whitespace-nowrap drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">
-            {summaryTitle}
-          </h2>
-          {/* 添加一根极简的点缀横线提升设计感 */}
-          <div className="w-10 h-[2px] bg-white/20 rounded-full mt-6" />
-        </div>
+        @keyframes endingReveal {
+          0% { opacity: 0; transform: translateY(18px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
 
-        {/* 核心面板：更大的圆角，更通透的毛玻璃 */}
-        <div className={`w-full bg-white/[0.02] backdrop-blur-3xl border rounded-[2rem] p-8 mb-10 relative ${glowColor}`}>
-          <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-[2rem] pointer-events-none" />
-          <StatRow label="事业与财富" value={stats.car} color="text-blue-400" />
-          <StatRow label="家庭与羁绊" value={stats.fam} color="text-pink-400" />
-          <StatRow label="健康与体魄" value={stats.hea} color="text-emerald-400" />
-          <StatRow label="内心幸福感" value={stats.hap} color="text-amber-400" />
-        </div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_24%,rgba(255,255,255,0.055),rgba(255,255,255,0)_30%)]" />
+      <div className="absolute left-1/2 top-[15%] h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-white/[0.02] blur-3xl" />
+      <div className="absolute bottom-[-9rem] left-1/2 h-[22rem] w-[30rem] -translate-x-1/2 rounded-full bg-blue-100/[0.02] blur-3xl" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.18),rgba(0,0,0,0.02)_34%,rgba(0,0,0,0.82)_100%)]" />
+      <div className="absolute inset-0 opacity-[0.05] [background-image:radial-gradient(rgba(255,255,255,0.6)_0.65px,transparent_0.7px)] [background-size:18px_18px]" />
 
-        {/* 底部文案区：增加留白 */}
-        <div className="mb-10 px-4 relative w-full">
-          <p className="text-white/60 text-sm leading-loose tracking-widest font-light">
-            {summaryText}
+      <div className="relative z-10 flex h-full flex-col px-7 pb-10 pt-12 text-center md:px-10 md:pt-16">
+        <div className="pointer-events-none mb-6 flex flex-col items-center gap-3">
+          <div className="h-px w-14 bg-gradient-to-r from-transparent via-white/45 to-transparent" />
+          <p className="font-serif text-[11px] tracking-[0.45em] text-white/28 md:text-xs">
+            回望此生
           </p>
         </div>
 
-        {/* 交互按钮：去掉死白底色，改为半透明磨砂质感悬浮框 */}
-        <button
-          onClick={onRestart}
-          className="group relative w-full py-4 rounded-full overflow-hidden border border-white/20 transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-[0_0_30px_rgba(255,255,255,0.05)] bg-white/5 backdrop-blur-md"
-        >
-          <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-          <span className="relative z-10 text-white font-bold tracking-[0.3em] text-sm pl-1 drop-shadow-md">
-            重溯时光
-          </span>
-        </button>
+        <div className="flex flex-1 items-center justify-center overflow-hidden">
+          <div className="w-full max-w-[92%] overflow-hidden md:max-w-[84%]">
+            <div
+              className="mx-auto flex min-h-[22rem] max-w-[16.75rem] flex-col justify-center gap-6 transition-transform duration-[1800ms] ease-out md:min-h-[24rem] md:max-w-[28rem] md:gap-7"
+              style={{ transform: `translateY(-${liftOffset}px)` }}
+            >
+              {visibleLines.map((line, index) => {
+                const age = visibleLines.length - index - 1;
+                const opacity = age === 0
+                  ? 0.98
+                  : age === 1
+                    ? 0.78
+                    : age === 2
+                      ? 0.58
+                      : age === 3
+                        ? 0.4
+                        : 0.24;
+                const blur = Math.min(age * 0.7, 2.2);
+                const drift = -Math.min(age * 8, 28);
 
+                return (
+                  <p
+                    key={`${line}-${visibleWindowStart + index}`}
+                    className="mx-auto max-w-full break-words text-center font-serif text-[16px] leading-[2.15] tracking-[0.1em] text-white/82 md:text-[23px] md:leading-[2.22]"
+                    style={{
+                      opacity,
+                      filter: `blur(${blur}px)`,
+                      transform: `translateY(${drift}px)`,
+                      textShadow: '0 0 18px rgba(255,255,255,0.06)',
+                      animation: 'endingLineFade 1500ms ease both',
+                    }}
+                  >
+                    {line}
+                  </p>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="mx-auto flex w-full max-w-[92%] flex-col items-center gap-7 pb-2 pt-6 md:max-w-[84%]">
+          <p
+            className={`max-w-[16.75rem] text-center font-serif text-[12px] leading-[2.1] tracking-[0.1em] text-white/54 md:max-w-[28rem] md:text-[15px] md:leading-[2.12] ${
+              showClosing ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={showClosing ? { animation: 'endingReveal 1600ms ease both' } : undefined}
+          >
+            {closingLine}
+          </p>
+
+          <div
+            className={`whitespace-nowrap text-center font-serif text-[10px] tracking-[0.18em] text-white/33 md:text-xs md:tracking-[0.24em] ${
+              showSignature ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={showSignature ? { animation: 'endingReveal 1400ms ease both' } : undefined}
+          >
+            {statText}
+          </div>
+
+          <button
+            onClick={onRestart}
+            className={`rounded-full border border-white/16 bg-white/[0.025] px-8 py-3 font-serif text-sm tracking-[0.38em] text-white/74 backdrop-blur-xl transition-all duration-700 hover:border-white/36 hover:bg-white/[0.08] hover:text-white hover:shadow-[0_0_28px_rgba(255,255,255,0.12)] active:scale-95 ${
+              showRestart ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={showRestart ? { animation: 'endingReveal 1400ms ease both' } : undefined}
+          >
+            重溯时光
+          </button>
+        </div>
       </div>
     </div>
   );

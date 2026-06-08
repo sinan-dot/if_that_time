@@ -35,4 +35,4 @@ export interface NodeData {
   passed?: boolean; // 【核心防卡死标记】：记录这个球有没有被玩家“错过”
 }
 
-export type GameState = 'START' | 'PLAYING' | 'ENDING';
+export type GameState = 'START' | 'PLAYING' | 'LEGEND' | 'ENDING';

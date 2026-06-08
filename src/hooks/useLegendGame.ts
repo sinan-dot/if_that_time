@@ -40,10 +40,6 @@ export function useLegendGame() {
     const item = legend.items.find(i => i.id === itemId);
     if (!item) return;
 
-    if (item.unlockRequirement && !stateRef.current.completedItems.includes(item.unlockRequirement)) {
-      return;
-    }
-
     setState(prev => ({
       ...prev,
       phase: 'story',
@@ -78,8 +74,10 @@ export function useLegendGame() {
 
       // 如果没有小游戏，直接完成该物品
       if (!item.minigame) {
-        const newCompletedItems = [...prev.completedItems, itemId];
-        const allCompleted = legend && newCompletedItems.length === legend.items.length;
+        const newCompletedItems = prev.completedItems.includes(itemId)
+          ? prev.completedItems
+          : [...prev.completedItems, itemId];
+        const allCompleted = legend && newCompletedItems.length >= legend.items.length;
 
         return {
           ...prev,
@@ -118,7 +116,7 @@ export function useLegendGame() {
       if (prev.completedItems.includes(prev.activeItemId)) {
         console.warn('completeMinigame: item already completed', prev.activeItemId);
         const legend = LEGENDS.find(l => l.id === prev.currentLegendId);
-        const allCompleted = legend && prev.completedItems.length === legend.items.length;
+        const allCompleted = legend && prev.completedItems.length >= legend.items.length;
         return {
           ...prev,
           phase: allCompleted ? 'ending' : 'exploring',
@@ -126,9 +124,11 @@ export function useLegendGame() {
         };
       }
 
-      const newCompletedItems = [...prev.completedItems, prev.activeItemId];
+      const newCompletedItems = prev.completedItems.includes(prev.activeItemId)
+        ? prev.completedItems
+        : [...prev.completedItems, prev.activeItemId];
       const legend = LEGENDS.find(l => l.id === prev.currentLegendId);
-      const allCompleted = legend && newCompletedItems.length === legend.items.length;
+      const allCompleted = legend && newCompletedItems.length >= legend.items.length;
 
       console.log('completeMinigame:', {
         activeItemId: prev.activeItemId,
@@ -148,9 +148,15 @@ export function useLegendGame() {
 
   const skipMinigame = useCallback(() => {
     setState(prev => {
-      const newCompletedItems = [...prev.completedItems, prev.activeItemId!];
+      if (!prev.activeItemId) {
+        return { ...prev, phase: 'exploring', activeItemId: null };
+      }
+
+      const newCompletedItems = prev.completedItems.includes(prev.activeItemId)
+        ? prev.completedItems
+        : [...prev.completedItems, prev.activeItemId];
       const legend = LEGENDS.find(l => l.id === prev.currentLegendId);
-      const allCompleted = legend && newCompletedItems.length === legend.items.length;
+      const allCompleted = legend && newCompletedItems.length >= legend.items.length;
 
       return {
         ...prev,

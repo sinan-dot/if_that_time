@@ -22,61 +22,60 @@ export const LegendStoryModal: React.FC<LegendStoryModalProps> = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/90 p-3 backdrop-blur-md md:items-center md:p-4"
     >
       <motion.div
-        initial={{ scale: 0.9, y: 30 }}
+        initial={{ scale: 0.96, y: 30 }}
         animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.9, y: 30 }}
+        exit={{ scale: 0.96, y: 30 }}
         transition={{ type: 'spring', damping: 25 }}
-        className="w-full max-w-md p-6 rounded-3xl bg-gradient-to-b from-white/15 to-white/5 border border-white/20 shadow-2xl"
+        className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-md flex-col overflow-hidden rounded-[28px] border border-white/20 bg-gradient-to-b from-white/15 to-white/5 shadow-2xl md:max-h-[85dvh]"
       >
-        {/* 物品标识 */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-4"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30">
-            <span className="text-xs uppercase tracking-widest text-blue-400 font-bold">
-              {item.name}
-            </span>
-          </div>
-        </motion.div>
+        <div className="overflow-y-auto px-5 pb-5 pt-6 md:px-6">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 text-center"
+          >
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-500/20 px-4 py-1.5">
+              <span className="text-xs font-bold uppercase tracking-widest text-blue-400">
+                {item.name}
+              </span>
+            </div>
+          </motion.div>
 
-        {/* 剧情标题 */}
-        <motion.h3
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="text-xl font-black text-white font-display text-center mb-4"
-        >
-          {item.story.title}
-        </motion.h3>
+          <motion.h3
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="mb-4 text-center font-display text-xl font-black text-white md:text-2xl"
+          >
+            {item.story.title}
+          </motion.h3>
 
-        {/* 剧情叙述 - 第一人称沉浸式 */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-white/85 text-center leading-relaxed mb-6 whitespace-pre-line font-light"
-        >
-          {item.story.narrative}
-        </motion.div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="whitespace-pre-line text-center text-[15px] leading-7 text-white/85 md:text-base"
+          >
+            {item.story.narrative}
+          </motion.div>
+        </div>
 
-        {/* 继续按钮 */}
-        <motion.button
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={onNext}
-          className="w-full py-4 flex items-center justify-center gap-2 font-bold text-blue-900 bg-white rounded-2xl shadow-lg hover:bg-blue-50 transition-colors"
-        >
-          <span>做出选择</span>
-          <ChevronRight className="w-5 h-5" />
-        </motion.button>
+        <div className="border-t border-white/10 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-4 md:px-6 md:pb-5">
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={onNext}
+            className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-white py-4 font-bold text-blue-900 shadow-lg transition-colors hover:bg-blue-50"
+          >
+            <span>做出选择</span>
+            <ChevronRight className="h-5 w-5" />
+          </motion.button>
+        </div>
       </motion.div>
     </motion.div>
   );

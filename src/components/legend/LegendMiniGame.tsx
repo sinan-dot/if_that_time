@@ -53,7 +53,7 @@ export const LegendMiniGame: React.FC<LegendMiniGameProps> = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto p-3 md:items-center md:p-4"
       style={{
         background: 'linear-gradient(135deg, #FFF5E6 0%, #E6F3FF 50%, #F5FFE6 100%)',
       }}
@@ -84,7 +84,7 @@ export const LegendMiniGame: React.FC<LegendMiniGameProps> = ({
         initial={{ scale: 0.8, y: 30 }}
         animate={{ scale: 1, y: 0 }}
         transition={{ type: 'spring', bounce: 0.4 }}
-        className="w-full max-w-md p-8 rounded-3xl relative"
+        className="relative w-full max-w-md max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-[28px] p-4 md:max-h-[88dvh] md:p-8"
         style={{
           background: 'linear-gradient(145deg, #FFFFFF 0%, #FFF5F5 100%)',
           border: '4px solid rgba(255, 182, 193, 0.8)',
@@ -97,7 +97,7 @@ export const LegendMiniGame: React.FC<LegendMiniGameProps> = ({
         }}
       >
         {/* 小游戏标题 */}
-        <div className="text-center mb-6">
+        <div className="mb-5 text-center md:mb-6">
           <motion.div
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
@@ -301,7 +301,7 @@ const PuzzleGame: React.FC<{ onComplete: () => void; colors: any }> = ({ onCompl
   return (
     <div className="space-y-5">
       <div
-        className="grid grid-cols-3 gap-3 p-5 rounded-2xl"
+        className="grid grid-cols-3 gap-2 p-4 rounded-2xl md:gap-3 md:p-5"
         style={{
           background: 'rgba(255, 255, 255, 0.7)',
           border: '3px solid rgba(200, 180, 180, 0.3)',
@@ -473,7 +473,7 @@ const ScrewGame: React.FC<{ onComplete: () => void; screwCount: number; colors: 
 
       {/* 螺丝网格 */}
       <div
-        className="grid grid-cols-2 gap-4 p-5 rounded-2xl"
+        className="grid grid-cols-2 gap-3 p-4 rounded-2xl md:gap-4 md:p-5"
         style={{
           background: 'rgba(255, 255, 255, 0.7)',
           border: '3px solid rgba(200, 180, 180, 0.3)',
@@ -634,7 +634,7 @@ const SequenceGame: React.FC<{ onComplete: () => void; sequence: string[]; color
       </div>
 
       {/* 选项按钮 */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3 md:gap-4">
         {shuffledItems.map((item, index) => {
           const isCompleted = sequence.slice(0, currentStep).includes(item);
           const isWrong = wrongClick === item;
@@ -804,7 +804,7 @@ const MemoryGame: React.FC<{ onComplete: () => void; pairs: string[]; colors: an
 
       {/* 卡片网格 */}
       <div
-        className="grid grid-cols-4 gap-2 p-3 rounded-2xl"
+        className="grid grid-cols-4 gap-1.5 p-2.5 rounded-2xl md:gap-2 md:p-3"
         style={{
           background: 'rgba(255, 255, 255, 0.7)',
           border: '3px solid rgba(200, 180, 180, 0.3)',
@@ -823,7 +823,7 @@ const MemoryGame: React.FC<{ onComplete: () => void; pairs: string[]; colors: an
               whileTap={{ scale: isMatched ? 1 : 0.92 }}
               onClick={() => handleCardClick(card.id, card.pairId)}
               disabled={isMatched}
-              className="aspect-square min-h-[60px] rounded-xl flex items-center justify-center text-xs font-bold transition-all overflow-hidden"
+              className="aspect-square min-h-[54px] overflow-hidden rounded-xl flex items-center justify-center text-[11px] font-bold transition-all md:min-h-[60px] md:text-xs"
             >
               <motion.div
                 animate={{ rotateY: isFlipped || isMatched ? 0 : 180 }}

@@ -4,20 +4,24 @@
  */
 
 import React from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { LegendChapter, LegendItem } from '../../types/legend';
+import { motion } from 'motion/react';
+import { LegendChapter } from '../../types/legend';
 import { LegendHotzone } from './LegendHotzone';
 
 interface LegendBackgroundProps {
   legend: LegendChapter;
   completedItems: string[];
   onItemClick: (itemId: string) => void;
+  compact?: boolean;
+  focusedItemId?: string | null;
 }
 
 export const LegendBackground: React.FC<LegendBackgroundProps> = ({
   legend,
   completedItems,
   onItemClick,
+  compact = false,
+  focusedItemId = null,
 }) => {
   return (
     <motion.div
@@ -27,55 +31,57 @@ export const LegendBackground: React.FC<LegendBackgroundProps> = ({
       transition={{ duration: 1 }}
       className="absolute inset-0"
     >
-      {/* 主背景图 */}
-      <img
-        src={legend.backgroundImage}
-        alt={legend.name}
-        className="absolute inset-0 w-full h-full object-cover"
-      />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),rgba(255,255,255,0)_34%)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/55" />
 
-      {/* 文本叠加层 */}
-      {legend.textOverlayImage && (
-        <img
-          src={legend.textOverlayImage}
-          alt=""
-          className="absolute inset-0 w-full h-full object-contain pointer-events-none opacity-90"
-        />
-      )}
-
-      {/* 渐变遮罩 */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
-
-      {/* 热区层 */}
-      <div className="absolute inset-0">
-        {legend.items.map((item, index) => (
-          <LegendHotzone
-            key={item.id}
-            item={item}
-            index={index}
-            isCompleted={completedItems.includes(item.id)}
-            isLocked={
-              item.unlockRequirement
-                ? !completedItems.includes(item.unlockRequirement)
-                : false
-            }
-            onClick={() => onItemClick(item.id)}
+      <div className={`absolute inset-0 flex items-center justify-center ${compact ? 'px-4 py-3' : 'px-10 py-6'}`}>
+        <div className={`relative overflow-hidden rounded-[28px] border border-white/12 bg-black/30 shadow-2xl backdrop-blur-sm ${compact ? 'aspect-[3/4] w-full max-w-[19rem]' : 'aspect-[16/9] h-full max-h-[calc(100%-2rem)] w-full max-w-6xl'}`}>
+          <img
+            src={legend.backgroundImage}
+            alt={legend.name}
+            className="absolute inset-0 h-full w-full object-contain"
           />
-        ))}
+
+          {!compact && legend.textOverlayImage && (
+            <img
+              src={legend.textOverlayImage}
+              alt=""
+              className="pointer-events-none absolute inset-0 h-full w-full object-contain opacity-90"
+            />
+          )}
+
+          <div className="absolute inset-0 bg-gradient-to-t from-black/36 via-transparent to-black/14" />
+
+          <div className="absolute inset-0">
+            {legend.items.map((item, index) => (
+              <LegendHotzone
+                key={item.id}
+                item={item}
+                index={index}
+                isCompleted={completedItems.includes(item.id)}
+                isLocked={false}
+                isFocused={focusedItemId === item.id}
+                compact={compact}
+                onClick={() => onItemClick(item.id)}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* 伟人名称悬浮 */}
-      <motion.div
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="absolute top-4 left-0 right-0 text-center pointer-events-none"
-      >
-        <h2 className="text-2xl font-black text-white font-display tracking-wider drop-shadow-lg">
-          {legend.name}
-        </h2>
-        <p className="text-sm text-white/70 mt-1">{legend.title}</p>
-      </motion.div>
+      {!compact && (
+        <motion.div
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="pointer-events-none absolute left-0 right-0 top-4 text-center"
+        >
+          <h2 className="font-display text-2xl font-black tracking-wider text-white drop-shadow-lg">
+            {legend.name}
+          </h2>
+          <p className="mt-1 text-sm text-white/70">{legend.title}</p>
+        </motion.div>
+      )}
     </motion.div>
   );
 };

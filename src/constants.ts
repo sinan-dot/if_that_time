@@ -6,7 +6,10 @@
 import { Chapter } from "./types";
 
 export const GAME_CONSTANTS = {
-  SPEED: 6, // 已经为你调慢了速度，方便玩家看清文字
+  SPEED: 3.6,
+  NODE_SPACING: 1120,
+  MISS_DISTANCE: 180,
+  CHAPTER_TEXT_MS: 4800,
   TURN_SPEED_PERFECT: Math.PI / 2,
   TURN_SPEED_GREAT: Math.PI / 3,
   TURN_SPEED_OK: Math.PI / 6,
