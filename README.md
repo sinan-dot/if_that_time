@@ -43,7 +43,6 @@ npm run dev
 打开浏览器访问终端输出的本地地址（通常为 http://localhost:5173），即可开始你的人生回溯之旅。
 
 📁 核心目录结构 (Project Structure)
-Plaintext
 ├── public/
 │   ├── bgm2.mp3             # 全局沉浸式背景音乐
 │   └── ...
