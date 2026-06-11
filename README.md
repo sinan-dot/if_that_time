@@ -1,20 +1,74 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 🌌 人生模拟器 (Life Simulator)
 
-# Run and deploy your AI Studio app
+> *"你走过了一段极尽绚烂的旅程。有些遗憾，但更多的是无悔。你的名字，成为了别人仰望的星空。"*
 
-This contains everything you need to run your app locally.
+**人生模拟器** 是一款基于 React 和 HTML5 Canvas 构建的沉浸式交互网页游戏。本作摒弃了传统的复杂操作与战斗机制，专注于最纯粹的**叙事深度**与**人生抉择的底层逻辑**。玩家将化身为一颗穿越时间长河的“彗星”，在童年、青春、成年与暮年的不同阶段中穿梭，通过触碰不同的命运节点，书写属于自己的最终结局。
 
-View your app in AI Studio: https://ai.studio/apps/a9b19508-1b23-4e60-b817-ac0b8f31110b
+## ✨ 核心特性 (Features)
 
-## Run Locally
+- **☄️ 丝滑的物理与视觉引擎**
+  - **动态彗星拖尾**：基于 Canvas 实时渲染的高级渐变流光拖尾算法，带来灵动、充满科幻感的操控反馈。
+  - **引力追踪机制**：平滑阻尼算法 (Damping) 带来的拟真跟随手感，支持鼠标与移动端触摸交互。
+- **🎭 动态叙事与多维数值系统**
+  - **命运抉择**：每一个触碰的选项不仅会触发实时的“飘字”内心独白，还会根据底层逻辑隐性影响玩家的四大人生属性（💼 事业与财富、👨‍👩‍👧 家庭与羁绊、💪 健康与体魄、❤️ 内心幸福感）。
+  - **防卡死判定**：完善的边界碰撞与“错过（随波逐流）”检测，确保游戏流程的顺畅推进。
+- **🎬 电影级视听 UI (Cinematic UX)**
+  - **极简玻璃拟态 (Glassmorphism)**：大量运用 Tailwind CSS 的高斯模糊 (`backdrop-blur`) 与混合模式，打造深邃、通透的太空悬浮感。
+  - **走马灯结局**：游戏尾声不再是冰冷的数字结算，而是配合呼吸光晕与优雅衬线字体，缓缓浮现独属于你这一生轨迹的诗意判词。
+  - **无缝 BGM 控制**：沉浸式的音频预加载与状态管理。
 
-**Prerequisites:**  Node.js
+## 🛠️ 技术栈 (Tech Stack)
 
+- **前端框架**: [React 18](https://reactjs.org/) + [TypeScript](https://www.typescriptlang.org/)
+- **构建工具**: [Vite](https://vitejs.dev/)
+- **样式方案**: [Tailwind CSS](https://tailwindcss.com/) (极简原子化样式)
+- **核心渲染**: HTML5 `<canvas>` API (2D 上下文自定义动画帧主循环)
+- **无第三方依赖动画**: 采用原生 CSS Transition 与 `requestAnimationFrame`，保证极佳的性能与零依赖导致的白屏风险。
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## 🚀 快速启动 (Getting Started)
+
+确保你的本地环境中已安装 Node.js (推荐 v18+)。
+
+1. **克隆或下载项目**
+2. **安装依赖**
+   ```bash
+   npm install
+
+运行
+启动本地开发服务器
+
+Bash
+npm run dev
+游玩体验
+打开浏览器访问终端输出的本地地址（通常为 http://localhost:5173），即可开始你的人生回溯之旅。
+
+📁 核心目录结构 (Project Structure)
+Plaintext
+├── public/
+│   ├── bgm2.mp3             # 全局沉浸式背景音乐
+│   └── ...
+├── src/
+│   ├── components/
+│   │   ├── GameCore.tsx     # 【核心引擎】Canvas渲染、物理主循环、碰撞检测
+│   │   ├── HUD.tsx          # 【界面UI】沉浸式顶部进度条与阶段显示
+│   │   ├── ResultScreen.tsx # 【结算UI】动态走马灯与玻璃拟态属性面板
+│   │   └── StartScreen.tsx  # 【初始UI】游戏启屏界面
+│   ├── constants.ts         # 【数据配置】剧本节点、章节参数与全局常量
+│   ├── types.ts             # TypeScript 类型定义
+│   ├── App.tsx              # 根组件挂载
+│   └── index.css            # Tailwind 全局入口与自定义动画 Keyframes
+🎮 游玩指南 (How to Play)
+点击 "开始人生"，戴上耳机享受背景音乐。
+
+移动鼠标或滑动屏幕，控制你的“光球”左右穿梭。
+
+面对人生各个阶段飘落的选项节点，做出你的选择（撞击节点）。
+
+到达生命终点时，静静观看属于你的“人生最终答卷”。点击 "重溯时光" 即可开启新的平行宇宙。
+
+📝 开发者日记
+从最初因为括号嵌套导致的报错红海，到重构 draw 函数实现极致的光影粒子拖尾；从解决浏览器音频缓存的玄学问题，到彻底推翻传统进度条，亲手打磨出电影级的“走马灯”结局卡片……这个项目在不断试错与重构中，逐渐褪去了原有的粗糙，找到了属于它的独特 Vibe。
+
+致敬每一次报错，也致敬这无悔的青春！🚀
+
+Created with ❤️ by 充满好奇心的开发者.
