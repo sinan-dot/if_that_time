@@ -43,6 +43,7 @@ npm run dev
 打开浏览器访问终端输出的本地地址（通常为 http://localhost:5173），即可开始你的人生回溯之旅。
 
 📁 核心目录结构 (Project Structure)
+<pre>
 ├── public/
 │   └── bgm2.mp3             # 全局沉浸式背景音乐
 ├── src/
@@ -52,7 +53,8 @@ npm run dev
 │   │   └── ResultScreen.tsx # 【结算UI】动态走马灯与玻璃拟态面板
 │   ├── constants.ts         # 【数据配置】剧本节点常量
 │   ├── App.tsx              # 根组件挂载
-│   └── index.css            # Tailwind 全局入口🎮 游玩指南 (How to Play)
+│   └── index.css            # Tailwind 全局入口
+</pre>
 点击 "开始人生"，戴上耳机享受背景音乐。
 
 移动鼠标或滑动屏幕，控制你的“光球”左右穿梭。
