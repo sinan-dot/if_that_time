@@ -128,6 +128,7 @@ export const GameCore: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const requestRef = useRef<number | undefined>(undefined);
+  const lastFrameTimeRef = useRef<number>(0);
   const audioRef = useRef<HTMLAudioElement>(null);
   const chapterTextTimeoutRef = useRef<number | null>(null);
 
@@ -373,6 +374,7 @@ export const GameCore: React.FC = () => {
     const startX = containerRef.current.clientWidth / 2;
     const startY = containerRef.current.clientHeight * 0.8;
 
+    lastFrameTimeRef.current = 0;
     stateRef.current.x = startX;
     stateRef.current.targetX = startX;
     stateRef.current.y = startY;
@@ -404,8 +406,15 @@ export const GameCore: React.FC = () => {
     }, 800);
   };
 
-  const update = useCallback(() => {
+  const update = useCallback((timestamp: number) => {
     if (gameState !== 'PLAYING') return;
+
+    if (lastFrameTimeRef.current && timestamp - lastFrameTimeRef.current < 16) {
+      requestRef.current = requestAnimationFrame(update);
+      return;
+    }
+
+    lastFrameTimeRef.current = timestamp;
 
     const { x, y, speed, targetX, nodes, trail, particles } = stateRef.current;
 
@@ -522,6 +531,7 @@ export const GameCore: React.FC = () => {
 
   const startRun = useCallback(() => {
     if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    lastFrameTimeRef.current = 0;
     initGame();
     setGameState('PLAYING');
     playAudio();
@@ -543,6 +553,7 @@ export const GameCore: React.FC = () => {
   useEffect(() => {
     if (gameState !== 'PLAYING') return;
 
+    lastFrameTimeRef.current = 0;
     requestRef.current = requestAnimationFrame(update);
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
